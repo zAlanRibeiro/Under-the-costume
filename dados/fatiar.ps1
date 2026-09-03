@@ -3,8 +3,8 @@
 # os brancos internos do personagem (jaleco do medico, chapeu do chef, o fantasma).
 Add-Type -AssemblyName System.Drawing
 
-$raiz  = "c:\Users\alan.ribeiro\Desktop\MimikyuLover"
-$fonte = Join-Path $raiz "Gemini_Generated_Image_yes0qxyes0qxyes0.jpg"
+$raiz  = Split-Path -Parent $PSScriptRoot   # a raiz do projeto, para o script rodar em qualquer clone
+$fonte = Join-Path $raiz "costumes.jpg"
 $destino = Join-Path $raiz "imagens\fantasias"
 New-Item -ItemType Directory -Force $destino | Out-Null
 

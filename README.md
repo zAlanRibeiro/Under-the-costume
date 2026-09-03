@@ -43,7 +43,8 @@ imagens/              arte oficial, modelos 3D e sprites
   fantasias/          as 50 roupinhas, fatiadas da folha de referência
   tcg/                as 34 cartas
   itens/ comida/      sprites de itens
-dados/                JSONs de origem e o script que fatiou as fantasias
+costumes.jpg          folha de referência com as 50 fantasias (fonte dos sprites)
+dados/                JSONs de origem e o script que fatia a folha
 construir.sh          empacota tudo num arquivo único em dist/
 ```
 
@@ -61,7 +62,7 @@ Junta HTML, CSS, JS e **todas** as imagens (como data URI) num único `dist/inde
 - **As 34 cartas** — [Pokémon TCG API](https://pokemontcg.io)
 - **Builds competitivas** — [Smogon](https://www.smogon.com/dex/sv/pokemon/mimikyu/)
 - **Percentuais de uso em duplas** — [Pikalytics](https://www.pikalytics.com/pokedex/gen9doublesou/Mimikyu)
-- **As 50 roupinhas** — folha de referência gerada com Gemini, fatiada por [`dados/fatiar.ps1`](dados/fatiar.ps1)
+- **As 50 roupinhas** — folha de referência gerada com Gemini (`costumes.jpg`), fatiada em sprites individuais por [`dados/fatiar.ps1`](dados/fatiar.ps1)
 
 ## Detalhes de implementação
 
@@ -72,6 +73,27 @@ Junta HTML, CSS, JS e **todas** as imagens (como data URI) num único `dist/inde
 - **O gacha salva em `localStorage`**, dentro de `try/catch` — se o navegador bloquear, a página segue funcionando.
 - **As roupinhas tiveram o fundo removido por flood fill a partir das bordas**, não por chave de cor, para preservar o branco interno do jaleco do médico, do chapéu do chef e dos ossos do esqueleto.
 
-## Direitos
+## Direitos e afiliação
 
-Fã-site sem fins lucrativos, feito por gosto. **Pokémon é © Nintendo · Creatures Inc. · GAME FREAK inc.** Todas as imagens de personagens, cartas e sprites pertencem aos seus detentores. Nenhum uso comercial.
+> **Este não é um site oficial de Pokémon.** É um projeto de fã, sem fins lucrativos, e **não tem
+> nenhuma afiliação, patrocínio, aprovação ou endosso** da Nintendo, da Creatures Inc. ou da
+> GAME FREAK inc.
+
+Pokémon, Mimikyu e todos os nomes, personagens, cartas, sprites e imagens relacionados são marcas
+registradas e obras protegidas de seus respectivos detentores, reproduzidos aqui apenas para fins
+informativos. **Pokémon © 1995–2026 Nintendo · Creatures Inc. · GAME FREAK inc.**
+
+O site não tem publicidade, monetização, doações nem qualquer outra exploração comercial, e não
+distribui ROMs, jogos ou material que não seja informativo.
+
+### Sobre licença
+
+Este repositório **não tem licença open source**, e é intencional: boa parte do conteúdo aqui não é
+minha para licenciar. Uma licença permissiva no repositório inteiro estaria dizendo que qualquer um
+pode reusar comercialmente arte e sprites que pertencem à Nintendo — o que eu não posso autorizar.
+
+Se você quiser aproveitar alguma coisa, o código (HTML, CSS, JS e os scripts de build) é a parte que
+eu escrevi. As imagens em `imagens/` não são minhas e não estão cobertas por nenhuma permissão daqui.
+
+Se você detém direitos sobre algum material usado aqui e quer que ele seja removido, abra uma issue
+ou entre em contato — atendo na hora.
