@@ -1,0 +1,12 @@
+# Arquivo unico gerado por ./construir.sh (3,7 MB, muda a cada build).
+# O GitHub Pages serve o index.html da raiz, entao o dist so serve para
+# publicar como Artifact. Regenere com: ./construir.sh
+dist/
+
+# rascunhos de teste que eu crio na raiz durante o desenvolvimento
+_teste-*.html
+
+# lixo de sistema
+Thumbs.db
+desktop.ini
+.DS_Store
