@@ -1,0 +1,125 @@
+/* ------------------------------------------------------------
+   Herói
+   ------------------------------------------------------------ */
+.heroi {
+  max-width: var(--largura); margin: 0 auto;
+  padding: 52px 24px 70px;
+  display: grid; grid-template-columns: 1.05fr .95fr;
+  gap: 48px; align-items: center;
+}
+@media (max-width: 900px) {
+  .heroi { grid-template-columns: 1fr; gap: 34px; padding-top: 32px; }
+}
+
+.selo-tipos { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.selo {
+  font-family: var(--dados);
+  font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  padding: 5px 11px; border-radius: 999px; border: 1px solid currentColor;
+}
+.selo.fantasma { color: #A98BD8; background: rgba(122, 90, 168, .14); }
+.selo.fada     { color: var(--fada); background: rgba(224, 143, 176, .10); }
+.selo.dex      { color: var(--pano-fundo); }
+
+h1 {
+  font-size: clamp(52px, 9vw, 100px);
+  font-weight: 900; line-height: .86; letter-spacing: -.035em;
+  color: var(--pano); margin: 0 0 8px;
+  text-shadow: 0 0 40px rgba(227, 200, 106, .18);
+}
+.subtitulo-heroi {
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-style: italic; font-weight: 700;
+  font-size: clamp(19px, 2.4vw, 26px); line-height: 1.25;
+  color: var(--tinta); margin: 0 0 20px; max-width: 24ch;
+}
+.heroi p { max-width: 46ch; }
+
+.acoes { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
+.botao {
+  font-family: var(--dados);
+  font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  padding: 12px 20px; border-radius: var(--raio);
+  border: 1px solid var(--pano-fundo);
+  background: transparent; color: var(--pano);
+  cursor: pointer; text-decoration: none;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.botao:hover { background: var(--pano); color: var(--breu); border-color: var(--pano); }
+.botao.discreto { border-color: var(--borda-forte); color: var(--tinta-media); }
+.botao.discreto:hover { background: var(--cripta-alta); color: var(--tinta); border-color: var(--borda-forte); }
+.botao[disabled] { opacity: .4; cursor: not-allowed; }
+.botao[disabled]:hover { background: transparent; color: var(--pano); border-color: var(--pano-fundo); }
+
+:focus-visible { outline: 2px solid var(--fada); outline-offset: 3px; }
+
+/* --- palco: onde o disfarce quebra --- */
+.palco { position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.palco-luz {
+  position: absolute; width: 390px; height: 390px; top: 2%; left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(227, 200, 106, .13), transparent 66%);
+  pointer-events: none;
+}
+.alvo-disfarce {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  position: relative; width: min(400px, 92%); border-radius: var(--raio);
+  /* ele se inclina de leve na direção de quem está olhando */
+  transform: translate(var(--olhar-x, 0px), var(--olhar-y, 0px));
+}
+.alvo-disfarce img {
+  width: 100%; height: auto; display: block;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, .75))
+          drop-shadow(0 0 34px rgba(227, 200, 106, .16));
+}
+.alvo-disfarce .quebrado { display: none; }
+.alvo-disfarce.busted .intacto { display: none; }
+.alvo-disfarce.busted .quebrado { display: block; }
+.alvo-disfarce.busted img {
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, .75))
+          drop-shadow(0 0 34px rgba(122, 90, 168, .28));
+}
+
+@keyframes tremor {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  15% { transform: translate(-7px, 2px) rotate(-1.6deg); }
+  30% { transform: translate(6px, -3px) rotate(1.4deg); }
+  45% { transform: translate(-5px, -2px) rotate(-1deg); }
+  60% { transform: translate(4px, 3px) rotate(.8deg); }
+  80% { transform: translate(-2px, 0) rotate(-.4deg); }
+}
+/* três camadas para que os movimentos não briguem pelo transform:
+   botão = olhar · .flutua = respiração · .impacto = tremor do golpe */
+.impacto { display: block; }
+.impacto.tremendo { animation: tremor .5s ease-out; }
+
+@keyframes respirar {
+  0%, 100% { transform: translateY(0) rotate(-.5deg); }
+  50%      { transform: translateY(-9px) rotate(.5deg); }
+}
+.flutua { display: block; animation: respirar 6.5s ease-in-out infinite; }
+
+.medidor { width: min(410px, 92%); display: flex; flex-direction: column; gap: 7px; }
+.medidor-linha {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--dados);
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--tinta-fraca);
+}
+.medidor-linha b { color: var(--pano); font-weight: 700; }
+.medidor-trilho {
+  height: 5px; background: var(--cripta-alta);
+  border: 1px solid var(--borda); border-radius: 999px; overflow: hidden;
+}
+.medidor-barra {
+  height: 100%; width: 100%;
+  background: linear-gradient(90deg, var(--pano-fundo), var(--pano));
+  transition: width .3s linear;
+}
+.medidor-barra.reparando { background: linear-gradient(90deg, var(--assombro), var(--fada)); }
+.recado {
+  font-family: var(--giz); font-size: 20px; color: var(--fada);
+  min-height: 28px; text-align: center; margin: 0; max-width: none;
+}
+

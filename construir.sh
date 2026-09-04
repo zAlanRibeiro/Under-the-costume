@@ -38,16 +38,20 @@ done
   echo '<title>Sob o Pano de Mimikyu</title>'
   grep 'fonts\.' "$raiz/index.html"
   echo '<style>'
-  cat "$raiz/css/estilo.css"
+  # a mesma ordem dos <link> do index.html: a cascata depende dela
+  for m in base heroi conteudo builds cartas palco guarda-roupa anatomia; do
+    cat "$raiz/css/$m.css"
+  done
   echo '</style>'
   awk '/<body>/{f=1;next} /<\/body>/{f=0} f' "$raiz/index.html" \
-    | grep -vE 'js/(principal|fantasias)\.js' \
+    | grep -vE '<script src="js/' \
     | sed -f "$subs"
   echo '<script>'
+  cat "$raiz/js/comum.js"
   cat "$raiz/js/fantasias.js"
 
   # as 50 fantasias sao montadas em tempo de execucao pelo JS, entao o sed do HTML
-  # nao as alcanca: vao num mapa id -> data URI que o principal.js consulta
+  # nao as alcanca: vao num mapa id -> data URI que o guarda-roupa.js consulta
   echo 'window.FANTASIA_IMG = {'
   for f in "$raiz"/imagens/fantasias/*.png; do
     id="$(basename "$f" .png)"
@@ -56,7 +60,9 @@ done
   echo '};'
 
   # o proprio JS tambem cita imagens (o icone dos slots vazios)
-  sed -f "$subs" "$raiz/js/principal.js"
+  for m in fundo palco guarda-roupa anatomia interface; do
+    sed -f "$subs" "$raiz/js/$m.js"
+  done
   echo '</script>'
 } > "$saida"
 

@@ -1,0 +1,183 @@
+/* ============================================================
+   Sob o Pano de Mimikyu — folha de estilo
+   Tema único e deliberado: escuro. A luz do sol o adoece.
+   ============================================================ */
+
+:root {
+  /* --- terra --- */
+  --breu:        #0A0710;
+  --cripta:      #120D1B;
+  --cripta-alta: #1B1426;
+  --borda:       #2A2036;
+  --borda-forte: #3B2E4C;
+
+  /* --- o pano --- */
+  --pano:        #E3C86A;
+  --pano-claro:  #F2DE9B;
+  --pano-fundo:  #A88F3E;
+
+  /* --- acentos --- */
+  --fada:        #E08FB0;
+  --assombro:    #7A5AA8;
+  --madeira:     #8A5A3B;
+  --sangue:      #6E2B2B;
+
+  /* --- tinta --- */
+  --tinta:       #EDE6DC;
+  --tinta-media: #B6ABBF;
+  --tinta-fraca: #7D7288;
+
+  /* --- tipos --- */
+  --display: "Fraunces", "Bookman Old Style", Georgia, serif;
+  --corpo:   "Karla", "Segoe UI", system-ui, sans-serif;
+  --dados:   "Courier Prime", "Courier New", ui-monospace, monospace;
+  --giz:     "Caveat", "Bradley Hand", cursive;
+
+  /* --- ritmo --- */
+  --largura: 1120px;
+  --prosa: 62ch;
+  --raio: 3px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+
+body {
+  margin: 0;
+  background: var(--breu);
+  color: var(--tinta);
+  font-family: var(--corpo);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---- fundo: poeira, trama do pano, escuridão das bordas ---- */
+#poeira { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.vinheta {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(122, 90, 168, .20), transparent 60%),
+    radial-gradient(90% 60% at 50% 110%, rgba(227, 200, 106, .06), transparent 60%),
+    radial-gradient(140% 100% at 50% 50%, transparent 28%, rgba(10, 7, 16, .88) 100%);
+}
+
+.trama {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: .04;
+  background-image:
+    repeating-linear-gradient(0deg,  #E3C86A 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, #E3C86A 0 1px, transparent 1px 4px);
+}
+
+.pagina { position: relative; z-index: 2; }
+
+/* ------------------------------------------------------------
+   Cabeçalho e navegação
+   ------------------------------------------------------------ */
+.topo-fixo {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(10, 7, 16, .84);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borda);
+}
+.topo-fixo .interno {
+  max-width: var(--largura);
+  margin: 0 auto;
+  padding: 11px 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+.marca {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 900; font-size: 18px;
+  color: var(--pano); text-decoration: none;
+}
+.marca img {
+  width: 30px; height: auto; display: block;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 7px rgba(227, 200, 106, .35));
+}
+
+.navegacao { margin-left: auto; display: flex; gap: 2px; flex-wrap: wrap; }
+.navegacao a {
+  font-family: var(--dados);
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--tinta-fraca); text-decoration: none;
+  padding: 6px 10px; border-radius: var(--raio);
+}
+.navegacao a:hover { color: var(--pano); background: rgba(227, 200, 106, .07); }
+.navegacao a[aria-current="true"] { color: var(--pano-claro); }
+@media (max-width: 680px) { .navegacao { display: none; } }
+
+/* lombada lateral, como a de um dossiê arquivado */
+.lombada {
+  position: fixed; left: 18px; top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  font-family: var(--dados);
+  font-size: 11px; letter-spacing: .34em; text-transform: uppercase;
+  color: var(--tinta-fraca);
+  z-index: 30;
+  display: flex; align-items: center; gap: 16px;
+  pointer-events: none;
+}
+.lombada::before, .lombada::after {
+  content: ""; width: 1px; height: 60px;
+  background: linear-gradient(var(--borda-forte), transparent);
+}
+@media (max-width: 1340px) { .lombada { display: none; } }
+
+/* ------------------------------------------------------------
+   Estruturas de seção
+   ------------------------------------------------------------ */
+.faixa { max-width: var(--largura); margin: 0 auto; padding: 74px 24px; }
+.faixa + .faixa { padding-top: 0; }
+
+/* divisória em ponto de alinhavo */
+.costura {
+  max-width: var(--largura);
+  margin: 0 auto; height: 1px; border: 0;
+  background-image: repeating-linear-gradient(90deg, var(--borda-forte) 0 14px, transparent 14px 26px);
+  background-repeat: no-repeat;
+  background-size: calc(100% - 48px) 1px;
+  background-position: 24px 0;
+}
+
+.rotulo {
+  font-family: var(--dados);
+  font-size: 11px; letter-spacing: .26em; text-transform: uppercase;
+  color: var(--pano-fundo);
+  margin: 0 0 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.rotulo::before { content: ""; width: 22px; height: 1px; background: var(--pano-fundo); }
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  text-wrap: balance;
+  margin: 0;
+}
+h2 {
+  font-size: clamp(30px, 4.2vw, 46px);
+  font-weight: 900; line-height: 1.05; letter-spacing: -.015em;
+  color: var(--tinta); margin-bottom: 16px;
+}
+h3 { font-size: 20px; font-weight: 700; line-height: 1.2; color: var(--pano-claro); }
+p { margin: 0 0 16px; max-width: var(--prosa); color: var(--tinta-media); }
+p strong { color: var(--tinta); font-weight: 700; }
+.intro { font-size: 18px; }
+
+.giz {
+  font-family: var(--giz);
+  font-size: 23px; line-height: 1.35;
+  color: var(--pano);
+  transform: rotate(-1.2deg);
+  display: inline-block;
+}
+

@@ -1,0 +1,142 @@
+/* ============================================================
+   Builds competitivas
+   ============================================================ */
+.builds { display: flex; flex-direction: column; gap: 22px; }
+
+.build {
+  border: 1px solid var(--borda);
+  background: var(--cripta);
+  padding: 26px 28px 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 288px) minmax(0, 1fr);
+  gap: 22px 40px;
+  align-items: start;
+}
+.build.destaque {
+  border-left: 2px solid var(--pano-fundo);
+  background: linear-gradient(140deg, rgba(227, 200, 106, .06), var(--cripta) 46%);
+}
+@media (max-width: 880px) {
+  .build { grid-template-columns: 1fr; gap: 20px; padding: 22px; }
+}
+
+.build-topo {
+  grid-column: 1 / -1;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--borda); padding-bottom: 14px;
+}
+.build-formato {
+  display: block; font-family: var(--dados);
+  font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--pano-fundo); margin-bottom: 4px;
+}
+.build-topo h3 { font-size: 25px; color: var(--tinta); }
+.build.destaque .build-topo h3 { color: var(--pano-claro); }
+.build-tag {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fada); border: 1px solid currentColor;
+  padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+.build-tag.frio { color: var(--tinta-fraca); }
+
+/* as duas colunas internas */
+.build-lado, .build-corpo { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+/* --- ficha da build --- */
+.build-spec { margin: 0; display: flex; flex-direction: column; }
+.build-spec > div {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--borda);
+}
+.build-spec dt {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca);
+  padding-top: 2px;
+}
+.build-spec dd { margin: 0; font-family: var(--dados); font-size: 13.5px; color: var(--tinta); }
+.build-spec dd b { color: var(--pano); font-weight: 700; }
+.build-spec dd.vazio { color: var(--tinta-fraca); font-style: italic; font-size: 12px; }
+.build-spec .alt { color: var(--tinta-fraca); font-size: 11.5px; display: block; }
+
+/* --- distribuição de EVs, escala fixa de 0 a 252 --- */
+.ev-grafico { display: flex; flex-direction: column; gap: 6px; }
+.ev { display: grid; grid-template-columns: 34px minmax(0, 1fr) 32px; align-items: center; gap: 10px; }
+.ev-nome {
+  font-family: var(--dados); font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.ev-trilho {
+  height: 9px; background: var(--cripta-alta);
+  border: 1px solid var(--borda); display: block; position: relative;
+}
+.ev-barra { position: absolute; inset: 0 auto 0 0; background: var(--pano-fundo); display: block; }
+.ev-barra.cheia { background: linear-gradient(90deg, var(--pano-fundo), var(--pano)); }
+.ev-val {
+  font-family: var(--dados); font-size: 11.5px; color: var(--tinta-media);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.ev-escala {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) 32px; gap: 10px; margin-top: 1px;
+}
+.ev-escala .marcas {
+  display: flex; justify-content: space-between;
+  border-top: 1px solid var(--borda); padding-top: 4px;
+  font-family: var(--dados); font-size: 9.5px; color: var(--tinta-fraca);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- os quatro golpes --- */
+.build-golpes {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px;
+  background: var(--borda); border: 1px solid var(--borda);
+  counter-reset: golpe;
+}
+.build-golpes li {
+  background: var(--cripta-alta); padding: 11px 14px;
+  font-family: var(--dados); font-size: 13.5px; color: var(--pano-claro);
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  counter-increment: golpe;
+}
+.build-golpes li::before { content: counter(golpe); color: var(--tinta-fraca); font-size: 10px; }
+.build-golpes .alt, .build-golpes .uso {
+  font-size: 10.5px; color: var(--tinta-fraca); margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 520px) { .build-golpes { grid-template-columns: 1fr; } }
+
+.build-porque p { font-size: 15px; line-height: 1.55; margin: 0 0 12px; max-width: none; }
+.build-porque p:last-child { margin-bottom: 0; }
+.build-porque strong { color: var(--pano-claro); }
+
+/* --- bloco pronto para colar no Showdown --- */
+.showdown { border: 1px dashed var(--borda-forte); background: #0C0812; }
+.showdown-topo {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 12px; border-bottom: 1px dashed var(--borda-forte);
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.botao-copiar {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .12em; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--borda-forte);
+  color: var(--pano); padding: 4px 10px; cursor: pointer; border-radius: var(--raio);
+  transition: background .16s ease, color .16s ease, border-color .16s ease;
+}
+.botao-copiar:hover { background: var(--pano); color: var(--breu); border-color: var(--pano); }
+.botao-copiar.feito { color: var(--fada); border-color: var(--fada); background: transparent; }
+.showdown pre {
+  margin: 0; padding: 14px 16px; overflow-x: auto;
+  font-family: var(--dados); font-size: 12px; line-height: 1.6;
+  color: var(--tinta-media); white-space: pre;
+}
+
+.fonte-dados {
+  font-family: var(--dados); font-size: 11.5px; color: var(--tinta-fraca);
+  margin: 22px 0 0; max-width: none; line-height: 1.6;
+}
+.fonte-dados a { color: var(--pano-fundo); }
+

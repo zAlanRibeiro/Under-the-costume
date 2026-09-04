@@ -36,17 +36,39 @@ python -m http.server 8000
 
 ```
 index.html            a página inteira
-css/estilo.css        folha de estilo única
-js/fantasias.js       dados das 50 roupinhas do gacha
-js/principal.js       poeira de fundo, palco, gacha, susto e navegação
+
+css/                  ORDEM IMPORTA — a cascata depende dela
+  base.css            tokens, reset, fundo, cabeçalho, layout de seção
+  heroi.css           moldura do herói, selos, medidores
+  conteudo.css        registros, anatomia, ficha, golpes, habitat, retratos, rodapé
+  builds.css          as três builds competitivas
+  cartas.css          galeria do TCG
+  palco.css           carinho, comida, amizade e o susto
+  guarda-roupa.css    gacha, roleta e varal
+  anatomia.css        diagrama interativo
+
+js/                   comum.js precisa vir primeiro
+  comum.js            window.MK — o que todos consultam
+  fantasias.js        dados das 50 roupinhas
+  fundo.js            poeira em canvas e o olhar que segue o cursor
+  palco.js            carinho, comida, amizade, disfarce e susto
+  guarda-roupa.js     sorteio, roleta, varal e localStorage
+  anatomia.js         foco de luz no diagrama
+  interface.js        o pano, copiar build e navegação
+
 imagens/              arte oficial, modelos 3D e sprites
   fantasias/          as 50 roupinhas, fatiadas da folha de referência
   tcg/                as 34 cartas
   itens/ comida/      sprites de itens
 costumes.jpg          folha de referência com as 50 fantasias (fonte dos sprites)
-dados/                JSONs de origem e o script que fatia a folha
+dados/                JSONs de origem, o script que fatia a folha e utilitários
 construir.sh          empacota tudo num arquivo único em dist/
 ```
+
+> **A ordem dos `<link>` e dos `<script>` no `index.html` não é decorativa.** O CSS foi
+> escrito como uma cascata contínua e os arquivos são fatias dela na sequência original;
+> trocar a ordem quebra sobrescritas. No JS, `comum.js` define `window.MK`, que os outros
+> módulos leem. O `construir.sh` concatena na mesma ordem.
 
 ### `construir.sh`
 

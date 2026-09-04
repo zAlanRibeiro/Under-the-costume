@@ -9,7 +9,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400,100,1;9..144,700,100,1;9..144,900,100,1&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Courier+Prime:wght@400;700&family=Caveat:wght@600;700&display=swap">
-<link rel="stylesheet" href="css/estilo.css">
+<!-- a ordem importa: a cascata foi montada nesta sequência -->
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/heroi.css">
+<link rel="stylesheet" href="css/conteudo.css">
+<link rel="stylesheet" href="css/builds.css">
+<link rel="stylesheet" href="css/cartas.css">
+<link rel="stylesheet" href="css/palco.css">
+<link rel="stylesheet" href="css/guarda-roupa.css">
+<link rel="stylesheet" href="css/anatomia.css">
 </head>
 <body>
 
@@ -1314,7 +1322,13 @@ Adamant Nature
   </div>
 </div>
 
+<!-- comum.js precisa vir primeiro: os outros consultam window.MK -->
+<script src="js/comum.js"></script>
 <script src="js/fantasias.js"></script>
-<script src="js/principal.js"></script>
+<script src="js/fundo.js"></script>
+<script src="js/palco.js"></script>
+<script src="js/guarda-roupa.js"></script>
+<script src="js/anatomia.js"></script>
+<script src="js/interface.js"></script>
 </body>
 </html>

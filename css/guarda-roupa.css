@@ -1,0 +1,305 @@
+/* ============================================================
+   Guarda-roupa: a gaveta de panos
+   ============================================================ */
+.gr { display: flex; flex-direction: column; gap: 34px; }
+
+/* --- cor por raridade, usada no varal e na vitrine --- */
+.r-comum   { --r: #8E8397; --r-fraco: rgba(142,131,151,.13); }
+.r-incomum { --r: #7FA98C; --r-fraco: rgba(127,169,140,.14); }
+.r-rara    { --r: var(--pano); --r-fraco: rgba(227,200,106,.15); }
+.r-ultra   { --r: var(--fada); --r-fraco: rgba(224,143,176,.16); }
+.r-secreta { --r: #B78BEB; --r-fraco: rgba(183,139,235,.20); }
+
+/* ---------- estado trancado ---------- */
+.gr-tranca {
+  border: 1px dashed var(--borda-forte);
+  background: linear-gradient(150deg, rgba(122,90,168,.08), transparent 55%), var(--cripta);
+  padding: 30px 32px;
+  display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 22px; align-items: start;
+}
+.gr-agulha { width: 52px; height: 52px; color: var(--pano-fundo); }
+.gr-selo {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--pano-fundo);
+}
+.gr-tranca h3 { font-size: 23px; margin: 6px 0 10px; }
+.gr-tranca p { max-width: 62ch; }
+.gr-tranca .botao { margin-top: 4px; display: inline-block; }
+.gr-prog { max-width: 380px; margin: 18px 0; display: flex; flex-direction: column; gap: 7px; }
+.gr-prog-linha {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--dados); font-size: 11px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.gr-prog-linha b { color: var(--fada); font-variant-numeric: tabular-nums; }
+@media (max-width: 620px) { .gr-tranca { grid-template-columns: 1fr; } }
+
+/* ---------- mesa de costura ---------- */
+.gr-mesa {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  gap: 28px; align-items: stretch;
+}
+@media (max-width: 860px) { .gr-mesa { grid-template-columns: 1fr; } }
+
+.gr-vitrine {
+  position: relative;
+  border: 1px solid var(--borda);
+  background:
+    radial-gradient(66% 62% at 50% 44%, var(--r-fraco, rgba(227,200,106,.10)), transparent 72%),
+    var(--cripta);
+  min-height: 320px;
+  display: grid; place-items: center; padding: 26px;
+  transition: background .5s ease;
+}
+.gr-peca { width: 100%; display: grid; place-items: center; }
+/* display:grid vence o atributo hidden, entao precisa ser dito */
+.gr-peca[hidden] { display: none; }
+.gr-vazio {
+  font-family: var(--giz); font-size: 21px; color: var(--tinta-fraca);
+  text-align: center; margin: 0; max-width: none; line-height: 1.4;
+}
+
+.gr-revelada {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: 24px; align-items: center; width: 100%;
+}
+.gr-revelada img {
+  width: 190px; height: auto; display: block;
+  filter: drop-shadow(0 14px 22px rgba(0,0,0,.7));
+}
+.gr-revelada .info { min-width: 0; }
+.gr-revelada .rar {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--r); border: 1px solid currentColor;
+  padding: 3px 9px; border-radius: 999px; display: inline-block;
+}
+.gr-revelada h3 {
+  font-size: 30px; margin: 10px 0 8px; color: var(--r);
+}
+.gr-revelada p {
+  margin: 0; font-size: 15px; line-height: 1.55; max-width: 40ch;
+  color: var(--tinta-media);
+}
+.gr-revelada .dup {
+  display: block; margin-top: 12px;
+  font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca);
+}
+@media (max-width: 560px) {
+  .gr-revelada { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .gr-revelada p { max-width: none; }
+}
+
+@keyframes gr-entra {
+  0%   { opacity: 0; transform: scale(.82) translateY(14px); }
+  60%  { opacity: 1; transform: scale(1.03) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.gr-peca.novo { animation: gr-entra .5s cubic-bezier(.2,.8,.3,1); }
+
+/* brilho extra quando sai coisa boa */
+@keyframes gr-fulgor {
+  0%   { box-shadow: inset 0 0 0 1px var(--r), 0 0 0 rgba(0,0,0,0); }
+  40%  { box-shadow: inset 0 0 60px var(--r-fraco), 0 0 34px var(--r-fraco); }
+  100% { box-shadow: inset 0 0 0 0 transparent, 0 0 0 rgba(0,0,0,0); }
+}
+.gr-vitrine.fulgor { animation: gr-fulgor 1.2s ease-out; }
+
+/* ---------- painel de controle ---------- */
+/* ------------------------------------------------------------
+   A roleta: a fita corre e freia com a peça sorteada no meio
+   ------------------------------------------------------------ */
+.gr-roleta {
+  position: relative; width: 100%; height: 238px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
+}
+.gr-roleta[hidden] { display: none; }
+/* a fita nasce com a casa zero encostada no meio; o translate negativo
+   puxa a casa premiada até aqui */
+.gr-fita {
+  position: absolute; top: 0; left: 50%; height: 100%;
+  display: flex; align-items: center;
+  will-change: transform;
+}
+.gr-fita > figure {
+  flex: 0 0 168px; width: 168px; height: 100%;
+  margin: 0; display: grid; place-items: center;
+  position: relative;
+}
+.gr-fita > figure::after {
+  content: ""; position: absolute; inset: 26px 12px;
+  background: radial-gradient(60% 54% at 50% 50%, var(--r-fraco), transparent 72%);
+}
+.gr-fita img {
+  max-height: 196px; width: auto; display: block; position: relative;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .65));
+}
+/* a mira: onde a fita vai parar, marcada antes de parar */
+.gr-mira {
+  position: absolute; top: 8px; bottom: 8px; left: 50%;
+  width: 168px; margin-left: -84px;
+  border-left: 1px solid var(--borda-forte);
+  border-right: 1px solid var(--borda-forte);
+  pointer-events: none;
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.gr-mira::before, .gr-mira::after {
+  content: ""; position: absolute; left: 50%; margin-left: -6px;
+  border: 6px solid transparent;
+}
+.gr-mira::before { top: -1px;    border-top-color: var(--pano); }
+.gr-mira::after  { bottom: -1px; border-bottom-color: var(--pano); }
+/* o instante do pouso */
+.gr-roleta.parou .gr-mira {
+  border-color: var(--pano);
+  box-shadow: 0 0 26px var(--r-fraco, rgba(227, 200, 106, .3)) inset;
+}
+
+/* o interruptor de pular */
+.gr-rapida {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--tinta-fraca); cursor: pointer;
+  margin-top: 2px;
+}
+.gr-rapida input { margin: 1px 0 0; accent-color: var(--pano); cursor: pointer; }
+.gr-rapida i {
+  display: block; font-style: normal;
+  letter-spacing: .02em; text-transform: none;
+  font-size: 10.5px; color: var(--tinta-fraca); opacity: .72; margin-top: 2px;
+}
+.gr-rapida:hover { color: var(--pano); }
+
+.gr-painel {
+  border: 1px solid var(--borda); background: var(--cripta);
+  padding: 22px; display: flex; flex-direction: column; gap: 18px;
+}
+.gr-retalhos { display: flex; align-items: center; gap: 14px; }
+.gr-retalhos b {
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 900; font-size: 46px; line-height: 1;
+  color: var(--pano); font-variant-numeric: tabular-nums;
+}
+.gr-retalhos span {
+  font-family: var(--dados); font-size: 11px;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--tinta-media);
+}
+.gr-retalhos i {
+  display: block; margin-top: 5px; font-style: normal;
+  letter-spacing: 0; text-transform: none; font-size: 11px;
+  color: var(--tinta-fraca); line-height: 1.4;
+}
+.gr-acoes { display: flex; flex-direction: column; gap: 9px; }
+.gr-acoes .botao { text-align: center; }
+.gr-conta {
+  margin-top: auto; padding-top: 14px; border-top: 1px dashed var(--borda-forte);
+  display: flex; flex-direction: column; gap: 5px;
+  font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca);
+  font-variant-numeric: tabular-nums;
+}
+.gr-conta b { color: var(--pano); font-weight: 400; }
+
+/* ---------- o varal ---------- */
+.gr-varal-topo {
+  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  padding-bottom: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--borda);
+}
+.gr-varal-topo h3 { font-size: 21px; }
+.gr-varal-topo h3 small {
+  display: block; margin-top: 3px;
+  font-family: var(--dados); font-size: 10.5px; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.gr-legenda {
+  margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  font-family: var(--dados); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.gr-legenda .pt {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px;
+}
+.gr-legenda .pt.comum   { background: #8E8397; }
+.gr-legenda .pt.incomum { background: #7FA98C; }
+.gr-legenda .pt.rara    { background: var(--pano); }
+.gr-legenda .pt.ultra   { background: var(--fada); }
+.gr-legenda .pt.secreta { background: #B78BEB; }
+
+.gr-colecao {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px;
+}
+.gr-slot {
+  border: 1px solid var(--borda); background: var(--cripta);
+  padding: 10px 6px 9px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  position: relative; min-height: 132px;
+  font: inherit; color: inherit;   /* as costuradas são <button>: zera o estilo do agente */
+}
+/* só as peças já costuradas se clicam; as que faltam continuam <div> */
+button.gr-slot {
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+button.gr-slot:hover, button.gr-slot:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--pano);
+}
+button.gr-slot:focus-visible { outline: 2px solid var(--pano); outline-offset: 2px; }
+button.gr-slot:hover img { filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .75)); }
+.gr-slot .quadro { height: 74px; display: grid; place-items: center; width: 100%; }
+.gr-slot img { max-height: 74px; width: auto; display: block; }
+.gr-slot .nome {
+  font-family: var(--dados); font-size: 9.5px; line-height: 1.3;
+  color: var(--tinta-media); letter-spacing: .02em;
+}
+.gr-slot .qtd {
+  position: absolute; top: 5px; right: 6px;
+  font-family: var(--dados); font-size: 9px; color: var(--tinta-fraca);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ainda não costurado */
+.gr-slot.falta { border-style: dashed; border-color: var(--borda); }
+.gr-slot.falta .quadro img {
+  filter: brightness(0) invert(1);
+  opacity: .09; max-height: 46px; image-rendering: pixelated;
+}
+.gr-slot.falta .nome { color: var(--tinta-fraca); opacity: .5; }
+.gr-slot.falta .interro {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 900; font-size: 26px; color: var(--borda-forte);
+  padding-bottom: 22px;
+}
+
+/* já costurado: ganha a cor da raridade */
+.gr-slot.tem { border-color: var(--r); background: linear-gradient(180deg, var(--r-fraco), transparent 62%), var(--cripta); }
+.gr-slot.tem .nome { color: var(--r); }
+.gr-slot.tem img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gr-peca.novo, .gr-vitrine.fulgor { animation: none; }
+  button.gr-slot { transition: none; }
+  button.gr-slot:hover, button.gr-slot:focus-visible { transform: none; }
+}
+
+/* o atributo hidden precisa vencer o display:grid destes dois paineis */
+.gr-tranca[hidden], .gr-mesa[hidden] { display: none; }
+
+/* aviso de não-afiliação: precisa ser legível, não letra miúda escondida */
+.aviso-legal {
+  max-width: var(--largura);
+  margin: 20px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--borda);
+  font-family: var(--dados);
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--tinta-fraca);
+}
+.aviso-legal strong { color: var(--tinta-media); font-weight: 400; }
+

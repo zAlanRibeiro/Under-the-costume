@@ -1,0 +1,316 @@
+/* ------------------------------------------------------------
+   Registros do Pokédex
+   ------------------------------------------------------------ */
+.registros {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(266px, 1fr));
+  gap: 1px; background: var(--borda); border: 1px solid var(--borda);
+}
+.registro {
+  background: var(--cripta); padding: 25px 24px 22px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.registro .fonte {
+  font-family: var(--dados);
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--pano-fundo);
+}
+.registro blockquote {
+  margin: 0;
+  font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-size: 17px; line-height: 1.45; color: var(--tinta);
+}
+.registro .ano {
+  margin-top: auto; font-family: var(--dados);
+  font-size: 11px; color: var(--tinta-fraca); font-variant-numeric: tabular-nums;
+}
+.registro.grave { background: var(--cripta-alta); border-left: 2px solid #8E3838; }
+.registro.grave blockquote { color: var(--pano-claro); }
+.registro.grave .fonte { color: #C46A6A; }
+
+/* ------------------------------------------------------------
+   Anatomia do disfarce
+   ------------------------------------------------------------ */
+.anatomia {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+  gap: 44px; align-items: start;
+}
+@media (max-width: 940px) { .anatomia { grid-template-columns: 1fr; gap: 30px; } }
+
+.diagrama {
+  background:
+    radial-gradient(70% 60% at 50% 42%, rgba(122, 90, 168, .13), transparent 70%),
+    var(--cripta);
+  border: 1px solid var(--borda);
+  padding: 18px; position: relative;
+}
+.diagrama svg { width: 100%; height: auto; display: block; }
+.diagrama .canto { position: absolute; width: 12px; height: 12px; border: 1px solid var(--pano-fundo); opacity: .5; }
+.diagrama .canto.ne { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+.diagrama .canto.no { top: 8px; left: 8px;  border-right: 0; border-bottom: 0; }
+.diagrama .canto.se { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+.diagrama .canto.so { bottom: 8px; left: 8px;  border-right: 0; border-top: 0; }
+
+.chamada-linha { stroke: var(--pano-fundo); stroke-width: 1; stroke-dasharray: 3 3; fill: none; }
+/* anel escuro para o ponto continuar legível quando cai sobre o pano claro */
+.chamada-ponto { fill: var(--fada); stroke: #140F1C; stroke-width: 1.4; }
+.chamada-txt {
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-size: 10px; letter-spacing: .1em; fill: var(--pano-claro);
+}
+
+.legenda { display: flex; flex-direction: column; }
+.legenda-item {
+  display: grid; grid-template-columns: 32px 1fr; gap: 14px;
+  padding: 15px 0; border-bottom: 1px solid var(--borda); align-items: start;
+}
+.legenda-item:first-child { border-top: 1px solid var(--borda); }
+.legenda-item .num {
+  font-family: var(--dados); font-size: 12px; color: var(--fada);
+  font-variant-numeric: tabular-nums; padding-top: 3px;
+}
+.legenda-item h3 { font-size: 16px; margin-bottom: 3px; }
+.legenda-item p { margin: 0; font-size: 15px; line-height: 1.5; max-width: none; }
+
+/* ------------------------------------------------------------
+   Ficha de campo + estatísticas
+   ------------------------------------------------------------ */
+.ficha-grade {
+  display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  gap: 46px; align-items: start;
+}
+@media (max-width: 860px) { .ficha-grade { grid-template-columns: 1fr; gap: 32px; } }
+
+.tabela-ficha {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--dados); font-size: 13.5px; font-variant-numeric: tabular-nums;
+}
+.tabela-ficha th, .tabela-ficha td {
+  text-align: left; padding: 9px 0;
+  border-bottom: 1px solid var(--borda); vertical-align: top;
+}
+.tabela-ficha th {
+  color: var(--tinta-fraca); font-weight: 400;
+  letter-spacing: .06em; text-transform: uppercase; font-size: 11px; width: 46%;
+}
+.tabela-ficha td { color: var(--tinta); }
+.tabela-ficha caption {
+  text-align: left; font-family: var(--dados);
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--pano-fundo); padding-bottom: 10px;
+}
+
+.grafico { display: flex; flex-direction: column; gap: 10px; }
+.stat { display: grid; grid-template-columns: 104px 1fr 34px; align-items: center; gap: 12px; }
+.stat .nome {
+  font-family: var(--dados); font-size: 11px;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--tinta-media);
+}
+.stat .trilho {
+  height: 18px;
+  background: repeating-linear-gradient(90deg, var(--cripta-alta) 0 1px, transparent 1px 12px), var(--cripta);
+  border: 1px solid var(--borda); position: relative;
+}
+.stat .barra {
+  position: absolute; inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--pano-fundo), var(--pano));
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 20%, calc(100% - 7px) 40%, 100% 62%, calc(100% - 7px) 80%, 100% 100%, 0 100%);
+}
+.stat .barra.alta { background: linear-gradient(90deg, var(--assombro), var(--fada)); }
+.stat .valor {
+  font-family: var(--dados); font-size: 13px; color: var(--pano-claro);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.eixo { display: grid; grid-template-columns: 104px 1fr 34px; gap: 12px; margin-top: 2px; }
+.eixo .marcas {
+  display: flex; justify-content: space-between;
+  font-family: var(--dados); font-size: 10px; color: var(--tinta-fraca);
+  font-variant-numeric: tabular-nums;
+  border-top: 1px solid var(--borda); padding-top: 5px;
+}
+.nota-grafico {
+  font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca);
+  margin: 14px 0 0; max-width: none;
+}
+
+.tipos-grade {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px; margin-top: 34px;
+}
+.tipo-caixa { border: 1px solid var(--borda); padding: 14px 16px; background: var(--cripta); }
+.tipo-caixa .cabeca {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .18em; text-transform: uppercase; margin-bottom: 9px;
+}
+.tipo-caixa.fraco .cabeca { color: #D4726F; }
+.tipo-caixa.forte .cabeca { color: var(--pano); }
+.tipo-caixa.imune .cabeca { color: #A98BD8; }
+.tipo-caixa ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tipo-caixa li {
+  font-family: var(--dados); font-size: 11.5px;
+  padding: 3px 8px; border: 1px solid var(--borda-forte); color: var(--tinta-media);
+}
+.tipo-caixa .mult {
+  font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca);
+  display: block; margin-top: 9px; font-variant-numeric: tabular-nums;
+}
+
+/* --- caixa da habilidade Disfarce --- */
+.habilidade {
+  margin-top: 34px; border: 1px solid var(--borda-forte);
+  background: linear-gradient(150deg, rgba(227, 200, 106, .07), transparent 58%), var(--cripta);
+  padding: 24px 26px;
+  display: grid; grid-template-columns: 44px 1fr; gap: 18px; align-items: start;
+}
+.habilidade .icone { width: 44px; height: 44px; color: var(--pano); }
+.habilidade h3 { font-size: 19px; margin-bottom: 6px; }
+.habilidade p { margin: 0 0 10px; font-size: 15px; }
+.habilidade p:last-child { margin-bottom: 0; }
+.habilidade .selo-mec {
+  font-family: var(--dados); font-size: 11px; color: var(--pano-fundo);
+  letter-spacing: .12em; text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------
+   Golpes
+   ------------------------------------------------------------ */
+.golpes {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(252px, 1fr));
+  gap: 1px; background: var(--borda); border: 1px solid var(--borda);
+}
+.golpe { background: var(--cripta); padding: 22px 22px 18px; display: flex; flex-direction: column; gap: 8px; }
+.golpe:hover { background: var(--cripta-alta); }
+.golpe .icone { width: 26px; height: 26px; color: var(--pano); }
+.golpe h3 { font-size: 17px; }
+.golpe .orig { font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca); margin-top: -5px; }
+.golpe p { font-size: 14.5px; line-height: 1.5; margin: 0; max-width: none; }
+.golpe .numeros {
+  margin-top: auto; padding-top: 12px;
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca);
+  font-variant-numeric: tabular-nums;
+  border-top: 1px dashed var(--borda-forte);
+}
+.golpe .numeros b { color: var(--pano); font-weight: 400; }
+.golpe.assinatura { background: linear-gradient(158deg, rgba(224, 143, 176, .11), var(--cripta) 56%); }
+.golpe.assinatura .icone, .golpe.assinatura h3 { color: var(--fada); }
+
+/* ------------------------------------------------------------
+   Habitat
+   ------------------------------------------------------------ */
+.habitat { display: grid; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); gap: 20px; }
+.lugar {
+  border: 1px solid var(--borda); border-top: 2px solid var(--pano-fundo);
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(122, 90, 168, .08), transparent 62%), var(--cripta);
+}
+.lugar .icone { width: 30px; height: 30px; color: var(--pano-fundo); margin-bottom: 10px; }
+.lugar h3 { font-size: 16px; margin-bottom: 6px; }
+.lugar p { font-size: 14.5px; line-height: 1.5; margin: 0; max-width: none; }
+.lugar .regiao {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-fraca);
+  display: block; margin-top: 10px;
+}
+
+/* ------------------------------------------------------------
+   Galeria de retratos
+   ------------------------------------------------------------ */
+.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(208px, 1fr)); gap: 18px; }
+.retrato {
+  border: 1px solid var(--borda); background: var(--cripta);
+  overflow: hidden; display: flex; flex-direction: column; margin: 0;
+}
+.retrato .moldura {
+  aspect-ratio: 1 / 1;
+  display: grid; place-items: center; padding: 12px;
+  background:
+    radial-gradient(58% 58% at 50% 46%, var(--brilho, rgba(227, 200, 106, .10)), transparent 72%),
+    var(--fundo-retrato, #0D0914);
+  position: relative;
+}
+.retrato .moldura img {
+  width: 100%; height: 100%; display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, .6));
+}
+/* sprites de jogo: manter o pixel quadrado, sem borrar */
+.retrato .moldura img.pixel {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transform: scale(1.28);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .7));
+}
+.retrato figcaption { border-top: 1px solid var(--borda); padding: 11px 13px 13px; }
+.retrato figcaption b {
+  display: block; font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 700; font-size: 15px; color: var(--pano-claro);
+}
+.retrato figcaption span {
+  font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca);
+  line-height: 1.4; display: block; margin-top: 3px;
+}
+.retrato figcaption .origem {
+  color: var(--pano-fundo); letter-spacing: .08em;
+  text-transform: uppercase; font-size: 10px; margin-top: 7px;
+}
+.retrato .placa {
+  position: absolute; top: 9px; left: 9px;
+  font-family: var(--dados); font-size: 9.5px; letter-spacing: .14em;
+  color: var(--tinta-fraca); border: 1px solid var(--borda);
+  padding: 2px 6px; background: rgba(10, 7, 16, .62);
+}
+
+/* ------------------------------------------------------------
+   O pano — não levante
+   ------------------------------------------------------------ */
+.aviso {
+  border: 1px solid var(--borda-forte);
+  background:
+    radial-gradient(80% 120% at 50% 0%, rgba(110, 43, 43, .18), transparent 62%),
+    var(--cripta);
+  padding: 46px 32px 42px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  position: relative; overflow: hidden;
+}
+.aviso h2 { margin-bottom: 2px; }
+.aviso p { max-width: 52ch; }
+.aviso .fita {
+  font-family: var(--dados); font-size: 11px;
+  letter-spacing: .28em; text-transform: uppercase; color: #C46A6A;
+}
+.aviso.revelado { animation: piscar .85s steps(2) 3; }
+@keyframes piscar {
+  0%, 100% { background-color: var(--cripta); }
+  50%      { background-color: #05030A; }
+}
+.revelacao {
+  margin-top: 8px; max-width: 56ch;
+  border-top: 1px solid var(--borda-forte); padding-top: 20px;
+}
+.revelacao p:last-child { margin-bottom: 0; }
+.revelacao .assinado { font-family: var(--giz); font-size: 22px; color: #C46A6A; }
+
+/* ------------------------------------------------------------
+   Rodapé
+   ------------------------------------------------------------ */
+.rodape { border-top: 1px solid var(--borda); margin-top: 74px; padding: 32px 24px 46px; }
+.rodape .interno {
+  max-width: var(--largura); margin: 0 auto;
+  display: flex; gap: 20px; flex-wrap: wrap;
+  align-items: center; justify-content: space-between;
+  font-family: var(--dados); font-size: 11.5px; color: var(--tinta-fraca);
+}
+.rodape a { color: var(--pano-fundo); }
+
+/* ------------------------------------------------------------
+   Movimento reduzido
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .flutua, .impacto.tremendo, .aviso.revelado { animation: none; }
+  * { transition-duration: .01ms !important; }
+}
+

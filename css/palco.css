@@ -1,0 +1,299 @@
+/* ============================================================
+   Palco: carinho, comida, amizade e o susto
+   ============================================================ */
+.area-carinho { position: relative; width: min(400px, 92%); }
+.area-carinho .alvo-disfarce { width: 100%; }
+
+/* --- faíscas de carinho --- */
+.faiscas { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: visible; }
+.faisca {
+  position: absolute;
+  font-family: var(--giz); font-size: 20px; line-height: 1;
+  color: var(--fada); pointer-events: none;
+  will-change: transform, opacity;
+  animation: subir-faisca 1100ms ease-out forwards;
+  text-shadow: 0 0 10px rgba(224, 143, 176, .5);
+}
+.faisca.doce { color: var(--pano); text-shadow: 0 0 10px rgba(227, 200, 106, .5); }
+@keyframes subir-faisca {
+  0%   { transform: translate(-50%, -50%) scale(.5) rotate(-8deg); opacity: 0; }
+  22%  { transform: translate(-50%, -70%) scale(1.05) rotate(4deg); opacity: 1; }
+  100% { transform: translate(-50%, -190%) scale(.85) rotate(-6deg); opacity: 0; }
+}
+
+/* --- o carinho em si: ele se aconchega --- */
+@keyframes aconchego {
+  0%, 100% { transform: rotate(0) scale(1); }
+  35%      { transform: rotate(-2.2deg) scale(1.018); }
+  70%      { transform: rotate(1.8deg) scale(1.01); }
+}
+.alvo-disfarce.acariciando img { animation: aconchego 1.5s ease-in-out infinite; }
+
+/* --- ele come --- */
+@keyframes mastigar {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25%      { transform: translateY(-14px) scale(1.05, .95); }
+  55%      { transform: translateY(0) scale(.96, 1.05); }
+  75%      { transform: translateY(-5px) scale(1.02, .99); }
+}
+.alvo-disfarce.comendo img { animation: mastigar .62s ease-out; }
+
+/* petisco que sobe até ele e some */
+.petisco {
+  position: absolute; left: 50%; top: 62%;
+  width: 34px; height: 34px; margin-left: -17px;
+  image-rendering: pixelated;
+  pointer-events: none; z-index: 4;
+  animation: petisco-some .62s ease-in forwards;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .8));
+}
+@keyframes petisco-some {
+  0%   { transform: translateY(46px) scale(1); opacity: 0; }
+  30%  { transform: translateY(0) scale(1.15); opacity: 1; }
+  100% { transform: translateY(-16px) scale(.3); opacity: 0; }
+}
+
+/* --- painel com os dois medidores --- */
+.painel {
+  width: min(400px, 92%);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.painel .medidor { width: 100%; }
+.medidor-linha i { font-style: normal; color: var(--tinta-media); }
+.medidor-barra.amizade {
+  width: 0%;
+  background: linear-gradient(90deg, var(--assombro), var(--fada));
+  transition: width .45s cubic-bezier(.2, .7, .3, 1);
+}
+.medidor-barra.amizade.maxima {
+  background: linear-gradient(90deg, var(--pano-fundo), var(--pano), var(--pano-claro));
+  box-shadow: 0 0 12px rgba(227, 200, 106, .55);
+}
+.medidor-barra.amizade.despencou { background: linear-gradient(90deg, #5A2323, #8E3838); }
+
+/* aura quando a amizade chega ao topo */
+.alvo-disfarce.amado img {
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, .75))
+          drop-shadow(0 0 40px rgba(227, 200, 106, .42));
+}
+
+/* --- comida --- */
+.comida {
+  width: min(400px, 92%);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.comida-rotulo {
+  font-family: var(--dados); font-size: 11px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.comida-botoes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.comida-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 9px 4px 8px;
+  background: var(--cripta); border: 1px solid var(--borda);
+  border-radius: var(--raio); cursor: pointer;
+  font-family: var(--dados); font-size: 10px;
+  letter-spacing: .04em; color: var(--tinta-media);
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.comida-btn img {
+  width: 28px; height: 28px; display: block;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .7));
+}
+.comida-btn:hover:not(:disabled) {
+  background: var(--cripta-alta); border-color: var(--pano-fundo);
+  color: var(--pano-claro); transform: translateY(-2px);
+}
+.comida-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* ============================================================
+   O susto
+   ============================================================ */
+.susto {
+  /* estourado para fora da viewport: o tranco não pode deixar aparecer a página atrás */
+  position: fixed; inset: -26px; z-index: 200;
+  background: #000;
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+/* --- a lâmpada da loja: acende no golpe, respira e depois falha --- */
+.susto-luz {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(44% 36% at 50% 40%, rgba(168, 128, 232, .58), transparent 70%),
+    radial-gradient(82% 72% at 50% 46%, rgba(227, 200, 106, .14), transparent 74%);
+}
+.susto.bateu .susto-luz {
+  animation: susto-acende 3s ease-out forwards,
+             susto-luz-respira 7s ease-in-out 1.2s infinite;
+}
+@keyframes susto-acende {
+  0%   { opacity: 0; }
+  2%   { opacity: 1; }
+  30%  { opacity: .72; }
+  100% { opacity: .55; }
+}
+/* propriedade diferente da de cima, então as duas animações convivem */
+@keyframes susto-luz-respira {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.16); }
+}
+
+/* --- a camada que garante que ele nunca fique parado --- */
+.susto-deriva { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.susto.bateu .susto-deriva {
+  animation: susto-deriva 11s ease-in-out 1.35s infinite,
+             susto-lampada 6.5s steps(1) 1.6s infinite;
+}
+@keyframes susto-deriva {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25%      { transform: translate(-10px, -7px) rotate(-.5deg); }
+  50%      { transform: translate(6px, -13px) rotate(.45deg); }
+  75%      { transform: translate(11px, -4px) rotate(.65deg); }
+}
+/* o pisca-pisca de um reator queimado: irregular de propósito */
+@keyframes susto-lampada {
+  0%, 8%   { filter: brightness(1); }
+  9%       { filter: brightness(1.85) contrast(1.12); }
+  10%      { filter: brightness(.5); }
+  11%      { filter: brightness(1.6); }
+  12%, 52% { filter: brightness(1); }
+  53%      { filter: brightness(.38); }
+  54.5%    { filter: brightness(1.45); }
+  56%, 79% { filter: brightness(1); }
+  80%      { filter: brightness(1.5); }
+  81%      { filter: brightness(.62); }
+  82%, 100%{ filter: brightness(1); }
+}
+
+.susto-bicho {
+  position: absolute;
+  width: min(146vh, 162vw); height: auto;
+  max-width: none;
+  filter: drop-shadow(0 0 60px rgba(0, 0, 0, .9)) contrast(1.3) saturate(.62) brightness(.88);
+  transform-origin: center 42%;
+  opacity: 0;
+}
+/* nada acontece enquanto .bateu não entra: são ~170ms de breu e silêncio antes do golpe */
+.susto.bateu .susto-bicho {
+  animation: susto-salta 3s cubic-bezier(.16, 1, .3, 1) forwards,
+             susto-arfa 4.6s ease-in-out 1.5s infinite;
+}
+/* o translate vem depois do scale para escalar junto com ele: é o que leva o
+   enquadramento até o rosto rasgado, que na arte fica acima e à direita do centro.
+   Ele salta com o rosto no meio da tela, segura, e só depois recua e escurece:
+   o bicho inteiro fica à vista, parado atrás do cartão, olhando. */
+@keyframes susto-salta {
+  0%   { transform: scale(.16)  translate(-14.5%, 57%);   opacity: 0; }
+  2%   { transform: scale(1.46) translate(-14.5%, 12.4%); opacity: 1; }
+  4%   { transform: scale(1.32) translate(-17.2%, 14.2%) rotate(-2.2deg); }
+  6%   { transform: scale(1.44) translate(-11.6%, 11.6%) rotate(2deg); }
+  8%   { transform: scale(1.33) translate(-16.2%, 13.8%) rotate(-1.3deg); }
+  10%  { transform: scale(1.41) translate(-13%, 12.4%)   rotate(.8deg); }
+  13%  { transform: scale(1.36) translate(-14.5%, 12.9%) rotate(0); opacity: 1; }
+  40%  { transform: scale(1.36) translate(-14.5%, 12.9%); opacity: 1;
+         animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  82%, 100% { transform: scale(.98) translate(0, .3%); opacity: .26; }
+}
+/* respiração: entra pelo drop-shadow, que o transform do salto não disputa */
+@keyframes susto-arfa {
+  0%, 100% { filter: drop-shadow(0 0 60px rgba(0, 0, 0, .9))   contrast(1.3)  saturate(.62) brightness(.88); }
+  50%      { filter: drop-shadow(0 0 96px rgba(122, 90, 168, .5)) contrast(1.38) saturate(.7) brightness(1); }
+}
+
+/* --- poeira levantada pelo golpe, subindo na luz --- */
+.susto-poeira { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.susto-poeira span {
+  position: absolute; border-radius: 50%;
+  background: rgba(227, 200, 106, .75);
+  opacity: 0;
+}
+.susto-poeira span.brasa { background: rgba(190, 152, 244, .8); }
+.susto.bateu .susto-poeira span { animation-name: susto-mota; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes susto-mota {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  14%  { opacity: .9; }
+  76%  { opacity: .55; }
+  100% { transform: translate(var(--desvio, 12px), var(--subida, -160px)); opacity: 0; }
+}
+
+/* a cena inteira leva um tranco quando o bicho aparece */
+.susto.bateu { animation: susto-treme .46s ease-out; }
+@keyframes susto-treme {
+  0%, 100% { transform: translate(0, 0); }
+  8%   { transform: translate(-13px, 9px); }
+  18%  { transform: translate(11px, -11px); }
+  28%  { transform: translate(-15px, -5px); }
+  40%  { transform: translate(13px, 11px); }
+  54%  { transform: translate(-9px, 4px); }
+  70%  { transform: translate(7px, -6px); }
+  86%  { transform: translate(-3px, 2px); }
+}
+/* z-index 3 para piscar por cima do cartão; pointer-events none porque, apagado
+   em opacity 0, ele continuaria interceptando o clique no botão de fechar */
+.susto-clarao {
+  position: absolute; inset: 0; background: #FFF; opacity: 0; z-index: 3;
+  pointer-events: none;
+}
+.susto.bateu .susto-clarao {
+  animation: susto-clarao .62s steps(1) forwards;
+}
+/* branco, branco, e o roxo que fica na retina depois */
+@keyframes susto-clarao {
+  0%   { opacity: 1;   background: #FFF; }
+  7%   { opacity: 0;   background: #FFF; }
+  10%  { opacity: .88; background: #FFF; }
+  15%  { opacity: 0;   background: #FFF; }
+  19%  { opacity: .42; background: #C9AEF2; }
+  24%  { opacity: 0;   background: #C9AEF2; }
+  100% { opacity: 0;   background: #C9AEF2; }
+}
+.susto-cartao {
+  position: relative; z-index: 2;
+  max-width: 480px; margin: 0 24px;
+  background: rgba(10, 7, 16, .94);
+  border: 1px solid var(--borda-forte);
+  padding: 30px 30px 28px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  opacity: 0;
+}
+.susto.bateu .susto-cartao { animation: susto-cartao 700ms ease-out 1.5s forwards; }
+/* o cartão se resolve no ar em vez de simplesmente aparecer */
+@keyframes susto-cartao {
+  from { opacity: 0; transform: translateY(20px) scale(.98); filter: blur(7px); }
+  to   { opacity: 1; transform: none;                        filter: blur(0); }
+}
+.susto-fita {
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .26em; text-transform: uppercase; color: #C46A6A;
+}
+.susto-cartao h2 { font-size: 30px; margin: 0; color: var(--pano-claro); }
+.susto-cartao p {
+  margin: 0; font-family: var(--display);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-size: 16px; line-height: 1.45; color: var(--tinta); max-width: 42ch;
+}
+.susto-cartao .susto-nota {
+  font-family: var(--corpo); font-size: 14px; color: var(--tinta-fraca);
+}
+.susto-cartao .botao { margin-top: 6px; }
+
+/* quem pediu menos movimento recebe a revelação sem salto, clarão nem tremor */
+@media (prefers-reduced-motion: reduce) {
+  .alvo-disfarce.acariciando img,
+  .alvo-disfarce.comendo img,
+  .petisco, .faisca { animation: none; }
+  .faisca { opacity: 1; }
+  .susto-clarao, .susto-poeira { display: none; }
+  .susto.bateu { animation: none; }
+  .susto.bateu .susto-deriva { animation: none; }
+  .susto.bateu .susto-luz { animation: none; opacity: .5; }
+  .susto.bateu .susto-bicho { animation: none; transform: scale(.98) translate(0, .3%); opacity: .5; }
+  .susto.bateu .susto-cartao { animation: none; opacity: 1; }
+}
+
+/* o atributo hidden precisa vencer o display:grid do overlay */
+.susto[hidden] { display: none; }
+
