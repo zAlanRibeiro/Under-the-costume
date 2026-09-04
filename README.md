@@ -62,7 +62,7 @@ Junta HTML, CSS, JS e **todas** as imagens (como data URI) num único `dist/inde
 - **As 34 cartas** — [Pokémon TCG API](https://pokemontcg.io)
 - **Builds competitivas** — [Smogon](https://www.smogon.com/dex/sv/pokemon/mimikyu/)
 - **Percentuais de uso em duplas** — [Pikalytics](https://www.pikalytics.com/pokedex/gen9doublesou/Mimikyu)
-- **As 50 roupinhas** — folha de referência gerada com Gemini (`costumes.jpg`), fatiada em sprites individuais por [`dados/fatiar.ps1`](dados/fatiar.ps1)
+- **As 50 roupinhas** — folha de referência gerada com Gemini (`costumes.jpg`), fatiada em sprites individuais por [`dados/fatiar.py`](dados/fatiar.py) (precisa de Pillow e numpy)
 
 ## Detalhes de implementação
 
