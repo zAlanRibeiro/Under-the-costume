@@ -6,6 +6,10 @@ dist/
 # rascunhos de teste que eu crio na raiz durante o desenvolvimento
 _teste-*.html
 
+# bytecode que o Python deixa ao importar o dados/fatiar.py
+__pycache__/
+*.pyc
+
 # lixo de sistema
 Thumbs.db
 desktop.ini
