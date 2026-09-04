@@ -1245,9 +1245,15 @@ Adamant Nature
 
 <!-- o que acontece quando alguém insiste com o disfarce já quebrado -->
 <div class="susto" id="susto" hidden role="dialog" aria-modal="true" aria-labelledby="susto-titulo">
+  <!-- camadas separadas para que os movimentos não briguem pelo transform:
+       .susto-luz = a lâmpada · .susto-deriva = ele nunca fica parado · a imagem = o salto -->
+  <div class="susto-luz" id="susto-luz" aria-hidden="true"></div>
+  <div class="susto-deriva" id="susto-deriva">
+    <img class="susto-bicho" id="susto-bicho" src="imagens/mimikyu-home-10145.png" width="512" height="512"
+         alt="Mimikyu enorme, com o disfarce rasgado, ocupando a tela inteira">
+  </div>
+  <div class="susto-poeira" id="susto-poeira" aria-hidden="true"></div>
   <div class="susto-clarao" id="susto-clarao"></div>
-  <img class="susto-bicho" id="susto-bicho" src="imagens/mimikyu-home-10145.png" width="512" height="512"
-       alt="Mimikyu enorme, com o disfarce rasgado, ocupando a tela inteira">
   <div class="susto-cartao" id="susto-cartao">
     <span class="susto-fita">Registro restrito · Ultra Sol</span>
     <h2 id="susto-titulo">Ele estava avisando</h2>

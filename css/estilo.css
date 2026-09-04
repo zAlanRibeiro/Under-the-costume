@@ -971,53 +971,160 @@ h1 {
    O susto
    ============================================================ */
 .susto {
-  position: fixed; inset: 0; z-index: 200;
+  /* estourado para fora da viewport: o tranco não pode deixar aparecer a página atrás */
+  position: fixed; inset: -26px; z-index: 200;
   background: #000;
   display: grid; place-items: center;
   overflow: hidden;
 }
+/* --- a lâmpada da loja: acende no golpe, respira e depois falha --- */
+.susto-luz {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(44% 36% at 50% 40%, rgba(168, 128, 232, .58), transparent 70%),
+    radial-gradient(82% 72% at 50% 46%, rgba(227, 200, 106, .14), transparent 74%);
+}
+.susto.bateu .susto-luz {
+  animation: susto-acende 3s ease-out forwards,
+             susto-luz-respira 7s ease-in-out 1.2s infinite;
+}
+@keyframes susto-acende {
+  0%   { opacity: 0; }
+  2%   { opacity: 1; }
+  30%  { opacity: .72; }
+  100% { opacity: .55; }
+}
+/* propriedade diferente da de cima, então as duas animações convivem */
+@keyframes susto-luz-respira {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.16); }
+}
+
+/* --- a camada que garante que ele nunca fique parado --- */
+.susto-deriva { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.susto.bateu .susto-deriva {
+  animation: susto-deriva 11s ease-in-out 1.35s infinite,
+             susto-lampada 6.5s steps(1) 1.6s infinite;
+}
+@keyframes susto-deriva {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25%      { transform: translate(-10px, -7px) rotate(-.5deg); }
+  50%      { transform: translate(6px, -13px) rotate(.45deg); }
+  75%      { transform: translate(11px, -4px) rotate(.65deg); }
+}
+/* o pisca-pisca de um reator queimado: irregular de propósito */
+@keyframes susto-lampada {
+  0%, 8%   { filter: brightness(1); }
+  9%       { filter: brightness(1.85) contrast(1.12); }
+  10%      { filter: brightness(.5); }
+  11%      { filter: brightness(1.6); }
+  12%, 52% { filter: brightness(1); }
+  53%      { filter: brightness(.38); }
+  54.5%    { filter: brightness(1.45); }
+  56%, 79% { filter: brightness(1); }
+  80%      { filter: brightness(1.5); }
+  81%      { filter: brightness(.62); }
+  82%, 100%{ filter: brightness(1); }
+}
+
 .susto-bicho {
   position: absolute;
   width: min(146vh, 162vw); height: auto;
   max-width: none;
-  filter: drop-shadow(0 0 60px rgba(0, 0, 0, .9)) contrast(1.25) saturate(.7) brightness(.92);
+  filter: drop-shadow(0 0 60px rgba(0, 0, 0, .9)) contrast(1.3) saturate(.62) brightness(.88);
   transform-origin: center 42%;
-  animation: susto-salta 2.1s cubic-bezier(.16, 1, .3, 1) forwards;
+  opacity: 0;
 }
-/* o translate vem depois do scale para escalar junto com ele:
-   desloca o enquadramento até o rosto, que na arte fica acima e à direita do centro */
+/* nada acontece enquanto .bateu não entra: são ~170ms de breu e silêncio antes do golpe */
+.susto.bateu .susto-bicho {
+  animation: susto-salta 3s cubic-bezier(.16, 1, .3, 1) forwards,
+             susto-arfa 4.6s ease-in-out 1.5s infinite;
+}
+/* o translate vem depois do scale para escalar junto com ele: é o que leva o
+   enquadramento até o rosto rasgado, que na arte fica acima e à direita do centro.
+   Ele salta com o rosto no meio da tela, segura, e só depois recua e escurece:
+   o bicho inteiro fica à vista, parado atrás do cartão, olhando. */
 @keyframes susto-salta {
-  0%   { transform: scale(.28)  translate(-14%, 26%); opacity: 0; }
-  6%   { transform: scale(1.30) translate(-14%, 11%); opacity: 1; }
-  10%  { transform: scale(1.22) translate(-15.6%, 11.8%) rotate(-1.2deg); }
-  14%  { transform: scale(1.28) translate(-12.6%, 10.4%) rotate(1deg); }
-  18%  { transform: scale(1.23) translate(-15%, 11.4%) rotate(-.6deg); }
-  24%  { transform: scale(1.26) translate(-14%, 11%) rotate(0); }
-  70%  { transform: scale(1.20) translate(-14%, 11%); opacity: 1; }
-  100% { transform: scale(1.14) translate(-14%, 11%); opacity: .16; }
+  0%   { transform: scale(.16)  translate(-14.5%, 57%);   opacity: 0; }
+  2%   { transform: scale(1.46) translate(-14.5%, 12.4%); opacity: 1; }
+  4%   { transform: scale(1.32) translate(-17.2%, 14.2%) rotate(-2.2deg); }
+  6%   { transform: scale(1.44) translate(-11.6%, 11.6%) rotate(2deg); }
+  8%   { transform: scale(1.33) translate(-16.2%, 13.8%) rotate(-1.3deg); }
+  10%  { transform: scale(1.41) translate(-13%, 12.4%)   rotate(.8deg); }
+  13%  { transform: scale(1.36) translate(-14.5%, 12.9%) rotate(0); opacity: 1; }
+  40%  { transform: scale(1.36) translate(-14.5%, 12.9%); opacity: 1;
+         animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  82%, 100% { transform: scale(.98) translate(0, .3%); opacity: .26; }
 }
+/* respiração: entra pelo drop-shadow, que o transform do salto não disputa */
+@keyframes susto-arfa {
+  0%, 100% { filter: drop-shadow(0 0 60px rgba(0, 0, 0, .9))   contrast(1.3)  saturate(.62) brightness(.88); }
+  50%      { filter: drop-shadow(0 0 96px rgba(122, 90, 168, .5)) contrast(1.38) saturate(.7) brightness(1); }
+}
+
+/* --- poeira levantada pelo golpe, subindo na luz --- */
+.susto-poeira { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.susto-poeira span {
+  position: absolute; border-radius: 50%;
+  background: rgba(227, 200, 106, .75);
+  opacity: 0;
+}
+.susto-poeira span.brasa { background: rgba(190, 152, 244, .8); }
+.susto.bateu .susto-poeira span { animation-name: susto-mota; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes susto-mota {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  14%  { opacity: .9; }
+  76%  { opacity: .55; }
+  100% { transform: translate(var(--desvio, 12px), var(--subida, -160px)); opacity: 0; }
+}
+
+/* a cena inteira leva um tranco quando o bicho aparece */
+.susto.bateu { animation: susto-treme .46s ease-out; }
+@keyframes susto-treme {
+  0%, 100% { transform: translate(0, 0); }
+  8%   { transform: translate(-13px, 9px); }
+  18%  { transform: translate(11px, -11px); }
+  28%  { transform: translate(-15px, -5px); }
+  40%  { transform: translate(13px, 11px); }
+  54%  { transform: translate(-9px, 4px); }
+  70%  { transform: translate(7px, -6px); }
+  86%  { transform: translate(-3px, 2px); }
+}
+/* z-index 3 para piscar por cima do cartão; pointer-events none porque, apagado
+   em opacity 0, ele continuaria interceptando o clique no botão de fechar */
 .susto-clarao {
-  position: absolute; inset: 0; background: #FFF; opacity: 0;
-  animation: susto-clarao .5s steps(1) forwards;
+  position: absolute; inset: 0; background: #FFF; opacity: 0; z-index: 3;
+  pointer-events: none;
 }
+.susto.bateu .susto-clarao {
+  animation: susto-clarao .62s steps(1) forwards;
+}
+/* branco, branco, e o roxo que fica na retina depois */
 @keyframes susto-clarao {
-  0%   { opacity: .92; }
-  8%   { opacity: 0; }
-  12%  { opacity: .6; }
-  18%  { opacity: 0; }
-  100% { opacity: 0; }
+  0%   { opacity: 1;   background: #FFF; }
+  7%   { opacity: 0;   background: #FFF; }
+  10%  { opacity: .88; background: #FFF; }
+  15%  { opacity: 0;   background: #FFF; }
+  19%  { opacity: .42; background: #C9AEF2; }
+  24%  { opacity: 0;   background: #C9AEF2; }
+  100% { opacity: 0;   background: #C9AEF2; }
 }
 .susto-cartao {
   position: relative; z-index: 2;
   max-width: 480px; margin: 0 24px;
-  background: rgba(10, 7, 16, .93);
+  background: rgba(10, 7, 16, .94);
   border: 1px solid var(--borda-forte);
   padding: 30px 30px 28px;
   text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 12px;
-  opacity: 0; animation: susto-cartao 700ms ease-out 1.5s forwards;
+  opacity: 0;
 }
-@keyframes susto-cartao { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.susto.bateu .susto-cartao { animation: susto-cartao 700ms ease-out 1.5s forwards; }
+/* o cartão se resolve no ar em vez de simplesmente aparecer */
+@keyframes susto-cartao {
+  from { opacity: 0; transform: translateY(20px) scale(.98); filter: blur(7px); }
+  to   { opacity: 1; transform: none;                        filter: blur(0); }
+}
 .susto-fita {
   font-family: var(--dados); font-size: 10.5px;
   letter-spacing: .26em; text-transform: uppercase; color: #C46A6A;
@@ -1039,9 +1146,12 @@ h1 {
   .alvo-disfarce.comendo img,
   .petisco, .faisca { animation: none; }
   .faisca { opacity: 1; }
-  .susto-clarao { display: none; }
-  .susto-bicho { animation: none; transform: scale(1.05) translate(-14%, 11%); opacity: .5; }
-  .susto-cartao { animation: none; opacity: 1; }
+  .susto-clarao, .susto-poeira { display: none; }
+  .susto.bateu { animation: none; }
+  .susto.bateu .susto-deriva { animation: none; }
+  .susto.bateu .susto-luz { animation: none; opacity: .5; }
+  .susto.bateu .susto-bicho { animation: none; transform: scale(.98) translate(0, .3%); opacity: .5; }
+  .susto.bateu .susto-cartao { animation: none; opacity: 1; }
 }
 
 /* o atributo hidden precisa vencer o display:grid do overlay */

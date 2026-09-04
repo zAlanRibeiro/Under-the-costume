@@ -130,11 +130,11 @@
     var afetoValor  = document.getElementById("amizade-valor");
     var afetoEstado = document.getElementById("amizade-estado");
 
+    /* a classe .bateu no contentor rege todas as animações do susto, por isso
+       as camadas de dentro não precisam ser tocadas uma a uma pelo script */
     var susto       = document.getElementById("susto");
-    var sustoBicho  = document.getElementById("susto-bicho");
-    var sustoClarao = document.getElementById("susto-clarao");
-    var sustoCartao = document.getElementById("susto-cartao");
     var sustoFechar = document.getElementById("susto-fechar");
+    var sustoPoeira = document.getElementById("susto-poeira");
 
     /* --- estado --- */
     var AFETO_MAX = 255;
@@ -457,66 +457,128 @@
         var ac = new AC();
         var t = ac.currentTime;
 
-        var buf = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.35), ac.sampleRate);
+        /* tudo passa por aqui: uma única torneira para o volume do golpe */
+        var mestre = ac.createGain();
+        mestre.gain.value = 0.8;
+        mestre.connect(ac.destination);
+
+        /* 1. o estalo: ruído branco de ataque instantâneo, filtro despencando */
+        var buf = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.5), ac.sampleRate);
         var d = buf.getChannelData(0);
         for (var i = 0; i < d.length; i++) {
-          d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.2);
+          d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.6);
         }
         var ruido = ac.createBufferSource();
         ruido.buffer = buf;
         var filtro = ac.createBiquadFilter();
         filtro.type = "lowpass";
-        filtro.frequency.setValueAtTime(1900, t);
-        filtro.frequency.exponentialRampToValueAtTime(190, t + 0.3);
+        filtro.frequency.setValueAtTime(3400, t);
+        filtro.frequency.exponentialRampToValueAtTime(170, t + 0.4);
         var g1 = ac.createGain();
-        g1.gain.setValueAtTime(0.22, t);
-        g1.gain.exponentialRampToValueAtTime(0.0008, t + 0.34);
-        ruido.connect(filtro); filtro.connect(g1); g1.connect(ac.destination);
-        ruido.start(t); ruido.stop(t + 0.36);
+        g1.gain.setValueAtTime(0.5, t);
+        g1.gain.exponentialRampToValueAtTime(0.0008, t + 0.46);
+        ruido.connect(filtro); filtro.connect(g1); g1.connect(mestre);
+        ruido.start(t); ruido.stop(t + 0.5);
 
+        /* 2. a barriga do susto: sub descendo até quase o inaudível */
         var osc = ac.createOscillator();
         osc.type = "sine";
-        osc.frequency.setValueAtTime(150, t);
-        osc.frequency.exponentialRampToValueAtTime(38, t + 0.32);
+        osc.frequency.setValueAtTime(172, t);
+        osc.frequency.exponentialRampToValueAtTime(31, t + 0.44);
         var g2 = ac.createGain();
-        g2.gain.setValueAtTime(0.24, t);
-        g2.gain.exponentialRampToValueAtTime(0.0008, t + 0.36);
-        osc.connect(g2); g2.connect(ac.destination);
-        osc.start(t); osc.stop(t + 0.38);
+        g2.gain.setValueAtTime(0.0001, t);
+        g2.gain.exponentialRampToValueAtTime(0.55, t + 0.012);
+        g2.gain.exponentialRampToValueAtTime(0.0008, t + 0.52);
+        osc.connect(g2); g2.connect(mestre);
+        osc.start(t); osc.stop(t + 0.54);
 
-        setTimeout(function () { ac.close(); }, 900);
+        /* 3. o guincho: três dentes-de-serra desafinados entre si, curtos e feios */
+        var guincho = ac.createGain();
+        guincho.gain.setValueAtTime(0.0001, t);
+        guincho.gain.exponentialRampToValueAtTime(0.15, t + 0.008);
+        guincho.gain.exponentialRampToValueAtTime(0.0006, t + 0.6);
+        guincho.connect(mestre);
+        [1390, 1477, 2090].forEach(function (hz, k) {
+          var o = ac.createOscillator();
+          o.type = "sawtooth";
+          o.frequency.setValueAtTime(hz, t);
+          o.frequency.linearRampToValueAtTime(hz * 0.68, t + 0.55);
+          var og = ac.createGain();
+          og.gain.value = k === 2 ? 0.32 : 1;
+          o.connect(og); og.connect(guincho);
+          o.start(t); o.stop(t + 0.6);
+        });
+
+        setTimeout(function () { ac.close(); }, 1200);
       } catch (e) { /* sem áudio: o susto continua funcionando visualmente */ }
     }
 
-    function reiniciarAnimacao(el) {
-      el.style.animation = "none";
-      void el.offsetWidth;
-      el.style.animation = "";
+    /* o golpe levanta a poeira do chão da loja; ela sobe na luz e não para mais.
+       São motas de tamanho, rota e ritmo próprios: nada deve pulsar em bloco. */
+    function semearPoeira() {
+      if (semMovimento || sustoPoeira.childElementCount) return;
+      var monte = document.createDocumentFragment();
+      for (var i = 0; i < 30; i++) {
+        var m = document.createElement("span");
+        var r = (0.9 + Math.random() * 2.8).toFixed(2) + "px";
+        m.style.left = (Math.random() * 100).toFixed(2) + "%";
+        m.style.top  = (52 + Math.random() * 54).toFixed(2) + "%";
+        m.style.width = r;
+        m.style.height = r;
+        m.style.setProperty("--desvio", (Math.random() * 70 - 35).toFixed(0) + "px");
+        m.style.setProperty("--subida", (-110 - Math.random() * 240).toFixed(0) + "px");
+        m.style.animationDuration = (4.5 + Math.random() * 6.5).toFixed(2) + "s";
+        m.style.animationDelay = (Math.random() * 7).toFixed(2) + "s";
+        if (Math.random() < 0.32) m.className = "brasa";
+        monte.appendChild(m);
+      }
+      sustoPoeira.appendChild(monte);
     }
+
+    /* a tela some, e por um instante não acontece nada. É nesse instante
+       que a pessoa se inclina para a tela. O golpe vem depois. */
+    var ESPERA_BREU = 170;
+    var agendado = null;
 
     function abrirSusto() {
       sustoAberto = true;
       ultimoFoco = document.activeElement;
       alvo.classList.remove("acariciando");
 
+      susto.classList.remove("bateu");
+      semearPoeira();
       susto.hidden = false;
-      reiniciarAnimacao(sustoBicho);
-      reiniciarAnimacao(sustoClarao);
-      reiniciarAnimacao(sustoCartao);
       document.documentElement.style.overflow = "hidden";
-      baque();
 
       afeto = 0;
       marcosVistos = {};
       pintarAfeto(true);
 
-      setTimeout(function () { sustoFechar.focus(); }, semMovimento ? 0 : 1700);
+      if (semMovimento) {
+        susto.classList.add("bateu");
+        sustoFechar.focus();
+        return;
+      }
+
+      agendado = setTimeout(function () {
+        agendado = null;
+        if (!sustoAberto) return;
+        susto.classList.add("bateu");
+        baque();
+        if (navigator.vibrate) navigator.vibrate([0, 55, 30, 120]);
+      }, ESPERA_BREU);
+
+      setTimeout(function () {
+        if (sustoAberto) sustoFechar.focus();
+      }, ESPERA_BREU + 1800);
     }
 
     function fecharSusto() {
       if (!sustoAberto) return;
       sustoAberto = false;
+      if (agendado) { clearTimeout(agendado); agendado = null; }
       susto.hidden = true;
+      susto.classList.remove("bateu");
       document.documentElement.style.overflow = "";
       insistencia = 0;
       restaurar(false);
