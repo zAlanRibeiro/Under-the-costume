@@ -43,6 +43,47 @@ fazendeiro fotografo magico piloto-de-corrida soldado ioga salva-vidas professor
 """.split()
 
 
+# --- os bolsoes de fundo -----------------------------------------------------
+# O flood fill entra pelas bordas da celula, entao o branco que fica cercado
+# pelo desenho sobrevive. Isso e o que preserva os brancos internos: o jaleco do
+# medico, o corpo do fantasma, o arminho do rei. Mas tambem preserva o papel que
+# ficou preso num vao, tipicamente o entalhe onde o graveto quase encosta no
+# corpo, e ele aparece como uma mancha branca sobre o fundo escuro do card.
+#
+# Nao da para separar os dois casos por conta propria. Nesse traco o branco da
+# roupa E o papel, com um contorno desenhado em volta: o chapeu do chef e a
+# cunha do samurai tem a mesma cor (253 contra 253), a mesma espessura e a mesma
+# topologia. So o desenho diz qual e qual, entao a decisao vem escrita aqui.
+#
+# Cada entrada e o centro aproximado de um bolsao, em coordenadas da celula.
+# Se algum parar de casar, o script avisa em vez de calar.
+BOLSOES_DE_FUNDO = {
+    # a cunha entre o corpo e o graveto
+    "samurai":       [(173, 182)],
+    "aviador":       [(169, 180), (176, 206)],
+    "astro-do-rock": [(175, 188)],
+    "medico":        [(184, 237), (160, 245), (176, 215)],
+    # o vao entre o arco do fone e a cabeca
+    "dj":            [(152, 69), (85, 73)],
+    # entre o elmo e o penacho
+    "cavaleiro":     [(163, 51), (174, 215)],
+    # o entalhe raso onde o graveto encosta na barra da roupa
+    "astronauta":    [(171, 214)],
+    "pirata":        [(172, 214)],
+    "chef":          [(172, 215)],
+    "ninja":         [(176, 215)],
+    "mago":          [(175, 214)],
+    "bombeiro":      [(174, 214)],
+    "robo":          [(175, 214)],
+    "detetive":      [(176, 215)],
+    "mecanico":      [(174, 206)],
+    "soldado":       [(184, 200)],
+    "professor":     [(178, 198)],
+    "operario":      [(175, 198)],
+}
+TOLERANCIA = 7   # quanto o centro de um bolsao pode ter andado e ainda casar
+
+
 def expande(semente, permitido):
     """Cresce a semente pelos vizinhos ate nao caber mais dentro de permitido."""
     atual = semente & permitido
@@ -96,7 +137,7 @@ def linhas_da_grade(escuro, eixo, extensao):
     return [(min(f), max(f)) for f in faixas]
 
 
-def recorta_celula(celula):
+def recorta_celula(celula, bolsoes=(), avisos=None):
     """Do retalho cru para (mascara do personagem, alpha suave). None se vazio."""
     claro = celula.min(axis=2) >= FUNDO_MIN
     alt, larg = claro.shape
@@ -139,6 +180,22 @@ def recorta_celula(celula):
         if xs.max() < NUMERO[0] and ys.max() < NUMERO[1]:
             continue                           # o numero da celula: fora
         guardadas |= ilha                      # peca solta de verdade (a aureola)
+
+    # o papel preso num vao do desenho: some pelo endereco anotado em
+    # BOLSOES_DE_FUNDO, porque nenhuma medida local o distingue de roupa branca
+    if bolsoes:
+        presos = claro & ~fundo & guardadas
+        for alvo in bolsoes:
+            achou = False
+            for ilha in componentes(presos):
+                ys, xs = np.nonzero(ilha)
+                if (abs(xs.mean() - alvo[0]) <= TOLERANCIA
+                        and abs(ys.mean() - alvo[1]) <= TOLERANCIA):
+                    guardadas &= ~ilha
+                    achou = True
+                    break
+            if not achou and avisos is not None:
+                avisos.append(alvo)
 
     # a franja: pixels quase brancos que encostam no fundo saem por meio-tom,
     # em vez de ficarem opacos e virarem pontinhos claros sobre o card escuro
@@ -215,9 +272,12 @@ def main():
         y0, y1 = fileiras[idx // 10]
         x0, x1 = colunas[idx % 10]
         celula = folha[y0:y1, x0:x1]
-        achado = recorta_celula(celula)
+        avisos = []
+        achado = recorta_celula(celula, BOLSOES_DE_FUNDO.get(nome, ()), avisos)
         if achado is None:
             sys.exit("celula vazia: %s" % nome)
+        for alvo in avisos:
+            print("AVISO: %s nao tem bolsao em %s; a lista saiu do lugar" % (nome, alvo))
         mascara, alpha = achado
         ys, xs = np.nonzero(mascara)
         cy0, cy1, cx0, cx1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
