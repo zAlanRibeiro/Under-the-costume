@@ -846,6 +846,11 @@ Adamant Nature
             <div class="gr-peca" id="gr-peca">
               <p class="gr-vazio">A gaveta está aberta.<br>Gaste um retalho e veja o que ele fez ontem à noite.</p>
             </div>
+            <!-- a agulha passando pelas peças até parar numa: só durante o sorteio -->
+            <div class="gr-roleta" id="gr-roleta" hidden aria-hidden="true">
+              <div class="gr-fita" id="gr-fita"></div>
+              <div class="gr-mira"></div>
+            </div>
           </div>
 
           <div class="gr-painel">
@@ -856,6 +861,10 @@ Adamant Nature
             <div class="gr-acoes">
               <button class="botao" id="gr-1">Costurar 1</button>
               <button class="botao discreto" id="gr-5">A noite toda · 5</button>
+              <label class="gr-rapida">
+                <input type="checkbox" id="gr-rapida">
+                <span>Rolagem rápida<i>vai direto ao que saiu</i></span>
+              </label>
             </div>
             <div class="gr-conta">
               <span><b id="gr-tem">0</b> de 50 no varal</span>
@@ -867,7 +876,7 @@ Adamant Nature
         <!-- ---------- o varal ---------- -->
         <div class="gr-varal">
           <div class="gr-varal-topo">
-            <h3>O varal</h3>
+            <h3>O varal<small>clique numa peça costurada para revê-la em cima</small></h3>
             <span class="gr-legenda">
               <i class="pt comum"></i>Comum
               <i class="pt incomum"></i>Incomum

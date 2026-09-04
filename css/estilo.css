@@ -1201,6 +1201,7 @@ h1 {
 @media (max-width: 860px) { .gr-mesa { grid-template-columns: 1fr; } }
 
 .gr-vitrine {
+  position: relative;
   border: 1px solid var(--borda);
   background:
     radial-gradient(66% 62% at 50% 44%, var(--r-fraco, rgba(227,200,106,.10)), transparent 72%),
@@ -1210,6 +1211,8 @@ h1 {
   transition: background .5s ease;
 }
 .gr-peca { width: 100%; display: grid; place-items: center; }
+/* display:grid vence o atributo hidden, entao precisa ser dito */
+.gr-peca[hidden] { display: none; }
 .gr-vazio {
   font-family: var(--giz); font-size: 21px; color: var(--tinta-fraca);
   text-align: center; margin: 0; max-width: none; line-height: 1.4;
@@ -1262,6 +1265,73 @@ h1 {
 .gr-vitrine.fulgor { animation: gr-fulgor 1.2s ease-out; }
 
 /* ---------- painel de controle ---------- */
+/* ------------------------------------------------------------
+   A roleta: a fita corre e freia com a peça sorteada no meio
+   ------------------------------------------------------------ */
+.gr-roleta {
+  position: relative; width: 100%; height: 238px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
+}
+.gr-roleta[hidden] { display: none; }
+/* a fita nasce com a casa zero encostada no meio; o translate negativo
+   puxa a casa premiada até aqui */
+.gr-fita {
+  position: absolute; top: 0; left: 50%; height: 100%;
+  display: flex; align-items: center;
+  will-change: transform;
+}
+.gr-fita > figure {
+  flex: 0 0 168px; width: 168px; height: 100%;
+  margin: 0; display: grid; place-items: center;
+  position: relative;
+}
+.gr-fita > figure::after {
+  content: ""; position: absolute; inset: 26px 12px;
+  background: radial-gradient(60% 54% at 50% 50%, var(--r-fraco), transparent 72%);
+}
+.gr-fita img {
+  max-height: 196px; width: auto; display: block; position: relative;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .65));
+}
+/* a mira: onde a fita vai parar, marcada antes de parar */
+.gr-mira {
+  position: absolute; top: 8px; bottom: 8px; left: 50%;
+  width: 168px; margin-left: -84px;
+  border-left: 1px solid var(--borda-forte);
+  border-right: 1px solid var(--borda-forte);
+  pointer-events: none;
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.gr-mira::before, .gr-mira::after {
+  content: ""; position: absolute; left: 50%; margin-left: -6px;
+  border: 6px solid transparent;
+}
+.gr-mira::before { top: -1px;    border-top-color: var(--pano); }
+.gr-mira::after  { bottom: -1px; border-bottom-color: var(--pano); }
+/* o instante do pouso */
+.gr-roleta.parou .gr-mira {
+  border-color: var(--pano);
+  box-shadow: 0 0 26px var(--r-fraco, rgba(227, 200, 106, .3)) inset;
+}
+
+/* o interruptor de pular */
+.gr-rapida {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-family: var(--dados); font-size: 10.5px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--tinta-fraca); cursor: pointer;
+  margin-top: 2px;
+}
+.gr-rapida input { margin: 1px 0 0; accent-color: var(--pano); cursor: pointer; }
+.gr-rapida i {
+  display: block; font-style: normal;
+  letter-spacing: .02em; text-transform: none;
+  font-size: 10.5px; color: var(--tinta-fraca); opacity: .72; margin-top: 2px;
+}
+.gr-rapida:hover { color: var(--pano); }
+
 .gr-painel {
   border: 1px solid var(--borda); background: var(--cripta);
   padding: 22px; display: flex; flex-direction: column; gap: 18px;
@@ -1298,6 +1368,11 @@ h1 {
   padding-bottom: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--borda);
 }
 .gr-varal-topo h3 { font-size: 21px; }
+.gr-varal-topo h3 small {
+  display: block; margin-top: 3px;
+  font-family: var(--dados); font-size: 10.5px; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca);
+}
 .gr-legenda {
   margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   font-family: var(--dados); font-size: 10px;
@@ -1320,7 +1395,19 @@ h1 {
   padding: 10px 6px 9px; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   position: relative; min-height: 132px;
+  font: inherit; color: inherit;   /* as costuradas são <button>: zera o estilo do agente */
 }
+/* só as peças já costuradas se clicam; as que faltam continuam <div> */
+button.gr-slot {
+  cursor: pointer;
+  transition: border-color .18s ease, transform .18s ease, background .18s ease;
+}
+button.gr-slot:hover, button.gr-slot:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--pano);
+}
+button.gr-slot:focus-visible { outline: 2px solid var(--pano); outline-offset: 2px; }
+button.gr-slot:hover img { filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .75)); }
 .gr-slot .quadro { height: 74px; display: grid; place-items: center; width: 100%; }
 .gr-slot img { max-height: 74px; width: auto; display: block; }
 .gr-slot .nome {
@@ -1355,6 +1442,8 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .gr-peca.novo, .gr-vitrine.fulgor { animation: none; }
+  button.gr-slot { transition: none; }
+  button.gr-slot:hover, button.gr-slot:focus-visible { transform: none; }
 }
 
 /* o atributo hidden precisa vencer o display:grid destes dois paineis */
