@@ -1461,3 +1461,101 @@ button.gr-slot:hover img { filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .75)); }
   color: var(--tinta-fraca);
 }
 .aviso-legal strong { color: var(--tinta-media); font-weight: 400; }
+
+/* ============================================================
+   Diagrama de anatomia interativo
+   Apontar para uma chamada acende a parte no desenho: o resto da
+   arte some no escuro e sobra um foco de luz em cima dela.
+   ============================================================ */
+
+.diagrama svg { touch-action: manipulation; }
+
+/* área de clique invisível, bem maior que o traço */
+.chamada { cursor: pointer; }
+.chamada .alvo { fill: transparent; stroke: none; }
+
+/* a arte apaga e só a parte recortada continua acesa */
+.arte { transition: filter .4s ease; }
+.diagrama.focando .arte { filter: brightness(.28) saturate(.4) contrast(.92); }
+
+.arte-foco { opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+.diagrama.focando .arte-foco { opacity: 1; }
+
+.anel {
+  fill: none;
+  stroke: var(--fada);
+  stroke-opacity: .55;
+  stroke-width: 1.4;
+  stroke-dasharray: 5 6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+}
+.diagrama.focando .anel { opacity: 1; }
+
+/* os círculos de recorte e os anéis deslizam de uma parte para a outra */
+#foco-a, #foco-b, #anel-a, #anel-b {
+  transition: cx .45s cubic-bezier(.2, .8, .3, 1),
+              cy .45s cubic-bezier(.2, .8, .3, 1),
+              r  .45s cubic-bezier(.2, .8, .3, 1);
+}
+
+/* transições das chamadas */
+.chamada-linha { transition: stroke .25s ease, stroke-width .25s ease, opacity .3s ease; }
+.chamada-ponto { transition: fill .25s ease, r .25s ease, opacity .3s ease; }
+.chamada-txt   { transition: fill .25s ease, opacity .3s ease; }
+
+/* com algo aceso, as outras chamadas recuam para o fundo */
+.diagrama.focando .chamada:not(.ativa) .chamada-linha,
+.diagrama.focando .chamada:not(.ativa) .chamada-ponto,
+.diagrama.focando .chamada:not(.ativa) .chamada-txt,
+.diagrama.focando .escala { opacity: .18; }
+
+/* a chamada acesa — o texto já nasce em pano-claro, então o destaque
+   tem de mudar de matiz, não só de brilho */
+.chamada.ativa .chamada-linha { stroke: var(--fada); stroke-width: 1.5; stroke-opacity: 1; }
+.chamada.ativa .chamada-ponto { fill: #FFF1CF; r: 5.5; }
+.chamada.ativa .chamada-txt   { fill: var(--fada); }
+
+/* fixada por clique: some o cursor de mão e marca com o traço cheio */
+.chamada.presa .chamada-linha { stroke-dasharray: 0; }
+
+.chamada:focus { outline: none; }
+.chamada:focus-visible {
+  outline: 2px solid var(--fada);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* --- a legenda ao lado responde junto --- */
+.legenda-item {
+  cursor: pointer;
+  padding-left: 12px;
+  margin-left: -12px;
+  border-left: 2px solid transparent;
+  transition: background .22s ease, border-color .22s ease;
+}
+.legenda-item.ativa {
+  background: linear-gradient(90deg, rgba(224, 143, 176, .10), transparent 72%);
+  border-left-color: var(--fada);
+}
+.legenda-item.ativa .num { color: var(--pano-claro); }
+.legenda-item.ativa h3   { color: var(--fada); }
+
+/* dica de uso, some assim que a pessoa mexe */
+.diagrama-dica {
+  font-family: var(--dados);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--tinta-fraca);
+  margin: -4px 0 22px;
+  max-width: none;
+  transition: opacity .3s ease;
+}
+.diagrama-dica.sumiu { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .veu, #foco-a, #foco-b,
+  .chamada-linha, .chamada-ponto, .chamada-txt { transition: none; }
+}

@@ -232,84 +232,126 @@
       <p class="rotulo">Anatomia do disfarce</p>
       <h2>Seis peças de um Pikachu feito de memória</h2>
 
-      <div class="anatomia">
+      <p class="diagrama-dica" id="diagrama-dica">Aponte para uma chamada — ou para um item da lista — e ela acende no desenho</p>
+<div class="anatomia">
         <div class="diagrama">
           <span class="canto no"></span><span class="canto ne"></span>
           <span class="canto so"></span><span class="canto se"></span>
-          <svg viewBox="0 0 700 510" role="img" aria-label="A ilustração oficial de Mimikyu com seis chamadas numeradas apontando para as orelhas, o rosto desenhado, as bochechas, o pano, a cauda de graveto e a barra rasgada, além de uma escala de dez centímetros">
-            <image href="imagens/mimikyu-arte-oficial.png" x="115" y="0" width="475" height="475"></image>
+          <svg viewBox="0 0 700 510" aria-label="Diagrama do disfarce de Mimikyu com seis chamadas numeradas. Aponte para uma delas para acendê-la no desenho.">
+            <defs>
+              <!-- o recorte do foco: dois círculos, porque orelhas e bochechas são duas -->
+              <clipPath id="recorte">
+                <circle id="foco-a" cx="350" cy="240" r="0"/>
+                <circle id="foco-b" cx="350" cy="240" r="0"/>
+              </clipPath>
+            </defs>
+
+            <!-- a arte, que escurece quando alguma parte é apontada -->
+            <image id="arte" class="arte" href="imagens/mimikyu-arte-oficial.png" x="115" y="0" width="475" height="475"
+                   role="img" aria-label="Ilustração oficial de Mimikyu: pano amarelado com rosto rabiscado, orelha esquerda em pé e a direita caída"></image>
+
+            <!-- a mesma arte por cima, recortada no foco: <use> reaproveita a de cima,
+                 então a imagem entra uma vez só no arquivo -->
+            <use class="arte-foco" href="#arte" clip-path="url(#recorte)"></use>
+            <circle class="anel" id="anel-a" cx="350" cy="240" r="0"></circle>
+            <circle class="anel" id="anel-b" cx="350" cy="240" r="0"></circle>
 
             <!-- chamadas à esquerda -->
-            <path class="chamada-linha" d="M315,212 L150,140 L12,140"/>
-            <circle class="chamada-ponto" cx="315" cy="212" r="3"/>
-            <text class="chamada-txt" x="12" y="134">02 · ROSTO DESENHADO</text>
+            <g class="chamada" data-parte="2" data-fa="345,232,88" tabindex="0" role="button" aria-label="Destacar o rosto desenhado">
+              <path class="chamada-linha" d="M315,212 L150,140 L12,140"/>
+              <circle class="chamada-ponto" cx="315" cy="212" r="3"/>
+              <text class="chamada-txt" x="12" y="134">02 · ROSTO DESENHADO</text>
+              <rect class="alvo" x="8" y="120" width="200" height="26"/>
+              <circle class="alvo" cx="315" cy="212" r="18"/>
+            </g>
 
-            <path class="chamada-linha" d="M283,230 L160,248 L12,248"/>
-            <circle class="chamada-ponto" cx="283" cy="230" r="3"/>
-            <text class="chamada-txt" x="12" y="242">03 · BOCHECHAS</text>
+            <g class="chamada" data-parte="3" data-fa="285,229,44" data-fb="387,283,44" tabindex="0" role="button" aria-label="Destacar as bochechas">
+              <path class="chamada-linha" d="M283,230 L160,248 L12,248"/>
+              <circle class="chamada-ponto" cx="283" cy="230" r="3"/>
+              <text class="chamada-txt" x="12" y="242">03 · BOCHECHAS</text>
+              <rect class="alvo" x="8" y="228" width="140" height="26"/>
+              <circle class="alvo" cx="283" cy="230" r="18"/>
+            </g>
 
-            <path class="chamada-linha" d="M290,358 L160,356 L12,356"/>
-            <circle class="chamada-ponto" cx="290" cy="358" r="3"/>
-            <text class="chamada-txt" x="12" y="350">04 · O PANO</text>
+            <g class="chamada" data-parte="4" data-fa="335,378,100" tabindex="0" role="button" aria-label="Destacar o pano">
+              <path class="chamada-linha" d="M290,358 L160,356 L12,356"/>
+              <circle class="chamada-ponto" cx="290" cy="358" r="3"/>
+              <text class="chamada-txt" x="12" y="350">04 · O PANO</text>
+              <rect class="alvo" x="8" y="336" width="110" height="26"/>
+              <circle class="alvo" cx="290" cy="358" r="18"/>
+            </g>
 
-            <path class="chamada-linha" d="M300,414 L160,442 L12,442"/>
-            <circle class="chamada-ponto" cx="300" cy="414" r="3"/>
-            <text class="chamada-txt" x="12" y="436">06 · BARRA RASGADA</text>
+            <g class="chamada" data-parte="6" data-fa="338,412,92" tabindex="0" role="button" aria-label="Destacar a barra rasgada">
+              <path class="chamada-linha" d="M300,414 L160,442 L12,442"/>
+              <circle class="chamada-ponto" cx="300" cy="414" r="3"/>
+              <text class="chamada-txt" x="12" y="436">06 · BARRA RASGADA</text>
+              <rect class="alvo" x="8" y="422" width="170" height="26"/>
+              <circle class="alvo" cx="300" cy="414" r="18"/>
+            </g>
 
             <!-- chamadas à direita -->
-            <path class="chamada-linha" d="M358,70 L520,48 L688,48"/>
-            <path class="chamada-linha" d="M472,228 L540,52"/>
-            <circle class="chamada-ponto" cx="358" cy="70" r="3"/>
-            <circle class="chamada-ponto" cx="472" cy="228" r="3"/>
-            <text class="chamada-txt" x="688" y="42" text-anchor="end">01 · ORELHAS</text>
+            <g class="chamada" data-parte="1" data-fa="356,88,70" data-fb="468,228,50" tabindex="0" role="button" aria-label="Destacar as orelhas">
+              <path class="chamada-linha" d="M358,70 L520,48 L688,48"/>
+              <path class="chamada-linha" d="M472,228 L540,52"/>
+              <circle class="chamada-ponto" cx="358" cy="70" r="3"/>
+              <circle class="chamada-ponto" cx="472" cy="228" r="3"/>
+              <text class="chamada-txt" x="688" y="42" text-anchor="end">01 · ORELHAS</text>
+              <rect class="alvo" x="576" y="28" width="116" height="26"/>
+              <circle class="alvo" cx="358" cy="70" r="18"/>
+              <circle class="alvo" cx="472" cy="228" r="18"/>
+            </g>
 
-            <path class="chamada-linha" d="M437,300 L600,250 L688,250"/>
-            <circle class="chamada-ponto" cx="437" cy="300" r="3"/>
-            <text class="chamada-txt" x="688" y="244" text-anchor="end">05 · CAUDA DE GRAVETO</text>
+            <g class="chamada" data-parte="5" data-fa="440,300,66" tabindex="0" role="button" aria-label="Destacar a cauda de graveto">
+              <path class="chamada-linha" d="M437,300 L600,250 L688,250"/>
+              <circle class="chamada-ponto" cx="437" cy="300" r="3"/>
+              <text class="chamada-txt" x="688" y="244" text-anchor="end">05 · CAUDA DE GRAVETO</text>
+              <rect class="alvo" x="512" y="230" width="180" height="26"/>
+              <circle class="alvo" cx="437" cy="300" r="18"/>
+            </g>
 
             <!-- escala real: 0,2 m de altura -->
-            <path class="chamada-linha" d="M12,495 L204,495 M12,489 L12,501 M204,489 L204,501" stroke-dasharray="0"/>
-            <text class="chamada-txt" x="12" y="483">10 cm · ALTURA TOTAL 0,2 m</text>
+            <path class="chamada-linha escala" d="M12,495 L204,495 M12,489 L12,501 M204,489 L204,501" stroke-dasharray="0"/>
+            <text class="chamada-txt escala" x="12" y="483">10 cm · ALTURA TOTAL 0,2 m</text>
           </svg>
         </div>
 
         <div class="legenda">
-          <div class="legenda-item">
+          <div class="legenda-item" data-parte="1">
             <span class="num">01</span>
             <div>
               <h3>Orelhas</h3>
               <p>Dois triângulos recortados do mesmo pano e escorados por dentro. A direita nunca fica de pé: pende para o lado em toda ilustração oficial.</p>
             </div>
           </div>
-          <div class="legenda-item">
+          <div class="legenda-item" data-parte="2">
             <span class="num">02</span>
             <div>
               <h3>Rosto desenhado</h3>
               <p>Olhos rabiscados em espiral e boca em ziguezague, feitos de memória. Mimikyu nunca chegou perto o suficiente de um Pikachu para conferir.</p>
             </div>
           </div>
-          <div class="legenda-item">
+          <div class="legenda-item" data-parte="3">
             <span class="num">03</span>
             <div>
               <h3>Bochechas</h3>
               <p>Dois borrões alaranjados no lugar aproximado. Não guardam eletricidade nenhuma — é só rabisco.</p>
             </div>
           </div>
-          <div class="legenda-item">
+          <div class="legenda-item" data-parte="4">
             <span class="num">04</span>
             <div>
               <h3>O pano</h3>
               <p>Peça funcional, não enfeite: bloqueia a luz do sol, que o deixa gravemente doente. Sem ele, Mimikyu adoece em horas.</p>
             </div>
           </div>
-          <div class="legenda-item">
+          <div class="legenda-item" data-parte="5">
             <span class="num">05</span>
             <div>
               <h3>Cauda de graveto</h3>
               <p>Um graveto grosso amarrado na ponta do pano, imitando o raio da cauda de Pikachu. É também com o que ele acerta você no Martelo de Madeira.</p>
             </div>
           </div>
-          <div class="legenda-item">
+          <div class="legenda-item" data-parte="6">
             <span class="num">06</span>
             <div>
               <h3>Barra rasgada</h3>
