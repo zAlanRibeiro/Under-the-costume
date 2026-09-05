@@ -35,7 +35,10 @@
     var PITY_RARA = 25;     /* costuras sem rara+ até forçar uma */
     var PITY_SECRETA = 70;
 
-    var s = { liberado: false, retalhos: 0, tem: {}, semRara: 0, semSecreta: 0, rapida: false };
+    /* quem pediu menos movimento comeca com a rolagem rapida ligada, mas pode
+       desmarcar: a preferencia do sistema define o padrao, nao uma trava */
+    var s = { liberado: false, retalhos: 0, tem: {}, semRara: 0, semSecreta: 0,
+              rapida: semMovimento };
 
     /* a fita corre por peças sorteadas e para na que saiu de verdade */
     var LARGURA_ITEM = 168;   /* precisa bater com o .gr-fita > figure do CSS */
@@ -56,7 +59,7 @@
           s.tem       = (d.tem && typeof d.tem === "object") ? d.tem : {};
           s.semRara   = d.semRara | 0;
           s.semSecreta = d.semSecreta | 0;
-          s.rapida    = !!d.rapida;
+          if (typeof d.rapida === "boolean") s.rapida = d.rapida;
         }
       } catch (e) { /* segue sem histórico salvo */ }
     }
@@ -164,7 +167,9 @@
     }
 
     function girar(res, aoFim) {
-      if (s.rapida || semMovimento) { aoFim(); return; }
+      /* so o interruptor decide. A fita corre dentro de uma caixa de 238px, sem
+         zoom nem clarao, e quem quiser pular tem a caixinha logo ali do lado. */
+      if (s.rapida) { aoFim(); return; }
       girando = true;
       pintarSaldo();
       montarFita(res.peca);
@@ -303,13 +308,15 @@
         behavior: semMovimento ? "auto" : "smooth" });
     });
 
-    chkRapida.checked = s.rapida;
     chkRapida.addEventListener("change", function () {
       s.rapida = chkRapida.checked;
       salvar();
     });
 
     carregar();
+    /* depois de carregar, senao a caixinha mostra o padrao em vez do que a
+       pessoa escolheu da ultima vez */
+    chkRapida.checked = s.rapida;
     if (s.liberado) {
       liberar(false);
     } else {
