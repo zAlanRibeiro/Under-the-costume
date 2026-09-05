@@ -287,11 +287,23 @@
    o site parece morto sem que ninguem tenha pedido isso. */
 :root.sem-movimento .susto.bateu { animation: none; }
 :root.sem-movimento .susto.bateu .susto-deriva { animation: none; }
+/* Sem o salto, mas presente. Fade de opacidade nao mexe com o labirinto --
+   o que provoca enjoo e deslocamento e escala, nao a coisa aparecer -- entao
+   ele surge inteiro em vez de ficar num meio-termo com cara de defeito. */
 :root.sem-movimento .susto.bateu .susto-bicho {
-  animation: none; transform: scale(.98) translate(0, .3%); opacity: .5;
+  animation: susto-surge 520ms ease-out forwards;
+  transform: scale(.98) translate(0, .3%);
 }
-:root.sem-movimento .susto.bateu .susto-luz { animation: none; opacity: .5; }
-:root.sem-movimento .susto.bateu .susto-cartao { animation: none; opacity: 1; }
+:root.sem-movimento .susto.bateu .susto-luz {
+  animation: susto-surge-luz 700ms ease-out forwards;
+}
+:root.sem-movimento .susto.bateu .susto-cartao {
+  animation: susto-surge-cartao 500ms ease-out 620ms forwards;
+  transform: none;
+}
+@keyframes susto-surge        { from { opacity: 0; } to { opacity: .95; } }
+@keyframes susto-surge-luz    { from { opacity: 0; } to { opacity: .55; } }
+@keyframes susto-surge-cartao { from { opacity: 0; } to { opacity: 1; } }
 
 /* o clarao fica de fora em qualquer caso: e estrobo branco, questao de
    fotossensibilidade, e nao depende do interruptor nem de o JS ter carregado */

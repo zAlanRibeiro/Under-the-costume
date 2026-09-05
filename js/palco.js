@@ -346,7 +346,6 @@
        O susto
        ========================================================== */
     function baque() {
-      if (semMovimento) return;
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       try {
@@ -454,23 +453,22 @@
       marcosVistos = {};
       pintarAfeto(true);
 
-      if (semMovimento) {
-        susto.classList.add("bateu");
-        sustoFechar.focus();
-        return;
-      }
-
+      /* Os dois caminhos batem no mesmo compasso: o que muda e o que a tela
+         faz. Com movimento reduzido saem o salto, o tranco, o clarao e a
+         vibracao, que sao o que ataca o labirinto e os olhos. Ficam a pausa no
+         breu e o som -- som nao e movimento, e sem ele o susto vira so uma
+         imagem parada aparecendo do nada. */
       agendado = setTimeout(function () {
         agendado = null;
         if (!sustoAberto) return;
         susto.classList.add("bateu");
         baque();
-        if (navigator.vibrate) navigator.vibrate([0, 55, 30, 120]);
+        if (!semMovimento && navigator.vibrate) navigator.vibrate([0, 55, 30, 120]);
       }, ESPERA_BREU);
 
       setTimeout(function () {
         if (sustoAberto) sustoFechar.focus();
-      }, ESPERA_BREU + 1800);
+      }, ESPERA_BREU + (semMovimento ? 700 : 1800));
     }
 
     function fecharSusto() {
