@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  var semMovimento = window.MK.semMovimento;
+
   /* ----------------------------------------------------------
      3b. Guarda-roupa: ele costura um pano novo por retalho
      ---------------------------------------------------------- */
