@@ -308,9 +308,13 @@
 /* ------------------------------------------------------------
    Movimento reduzido
    ------------------------------------------------------------ */
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .flutua, .impacto.tremendo, .aviso.revelado { animation: none; }
-  * { transition-duration: .01ms !important; }
+/* Movimento reduzido corta o que sacode a tela, nao o retorno miudo. O
+   "* { transition-duration: .01ms !important }" que morava aqui matava toda
+   transicao da pagina, inclusive hover de botao e troca de cor, e deixava o
+   site com cara de quebrado para quem so queria menos parallax. */
+:root.sem-movimento {
+  scroll-behavior: auto;
 }
+:root.sem-movimento .flutua,
+:root.sem-movimento .impacto.tremendo { animation: none; }
 

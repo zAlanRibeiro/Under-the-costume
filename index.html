@@ -9,6 +9,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400,100,1;9..144,700,100,1;9..144,900,100,1&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&family=Courier+Prime:wght@400;700&family=Caveat:wght@600;700&display=swap">
+<!-- Decide movimento ANTES da primeira pintura, senão a página anima e trava logo
+     depois. A escolha do visitante manda; sem escolha, vale o pedido do sistema.
+     No Windows esse pedido vem ligado em muita máquina sem ninguém ter pedido: o
+     preset "melhor desempenho" desliga as animações e o navegador reporta reduce. -->
+<script>
+(function () {
+  var quer = null;
+  try { quer = localStorage.getItem("mimikyu.movimento"); } catch (e) {}
+  var sem = (quer === null)
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : (quer === "nao");
+  document.documentElement.className += sem ? " sem-movimento" : " com-movimento";
+})();
+</script>
+
 <!-- a ordem importa: a cascata foi montada nesta sequência -->
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/heroi.css">
@@ -1288,6 +1303,9 @@ Adamant Nature
   <footer class="rodape">
     <div class="interno">
       <span>Sob o Pano · dossiê de campo sobre Mimikyu</span>
+      <button type="button" class="botao-movimento" id="botao-movimento" aria-pressed="false">
+        <span class="texto"></span>
+      </button>
       <span>Imagens e dados: PokéAPI (arte oficial, modelos e sprites), Pokémon TCG API (34 cartas), Smogon e Pikalytics (builds)</span>
     </div>
     <p class="aviso-legal">

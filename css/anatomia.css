@@ -91,7 +91,8 @@
 }
 .diagrama-dica.sumiu { opacity: 0; }
 
-@media (prefers-reduced-motion: reduce) {
-  .veu, #foco-a, #foco-b,
-  .chamada-linha, .chamada-ponto, .chamada-txt { transition: none; }
-}
+:root.sem-movimento .veu,
+:root.sem-movimento #foco-a, :root.sem-movimento #foco-b,
+:root.sem-movimento .chamada-linha,
+:root.sem-movimento .chamada-ponto,
+:root.sem-movimento .chamada-txt { transition: none; }

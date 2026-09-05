@@ -178,7 +178,7 @@
       if (acumulado > 26 && agora - ultimoPonto > 140) {
         acumulado = 0;
         ultimoPonto = agora;
-        if (!semMovimento) faisca(x, y);
+        faisca(x, y);
         somarAfeto(quebrado ? 2 : 1);
 
         if (agora - ultimoRecadoCarinho > 2400 && afeto < AFETO_MAX) {
@@ -215,7 +215,6 @@
     };
 
     function petisco(arquivo) {
-      if (semMovimento) return;
       var img = document.createElement("img");
       img.className = "petisco";
       img.src = arquivo;
@@ -410,10 +409,14 @@
       } catch (e) { /* sem áudio: o susto continua funcionando visualmente */ }
     }
 
+    /* Nem a faísca, nem o petisco, nem esta poeira olham para semMovimento: são
+       miúdos, locais e lentos. O que olha é o que sacode a tela inteira — o
+       tranco em sacudir(), o salto do susto e o parallax lá no fundo.js. */
+
     /* o golpe levanta a poeira do chão da loja; ela sobe na luz e não para mais.
        São motas de tamanho, rota e ritmo próprios: nada deve pulsar em bloco. */
     function semearPoeira() {
-      if (semMovimento || sustoPoeira.childElementCount) return;
+      if (sustoPoeira.childElementCount) return;
       var monte = document.createDocumentFragment();
       for (var i = 0; i < 30; i++) {
         var m = document.createElement("span");

@@ -281,11 +281,9 @@ button.gr-slot:hover img { filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .75)); }
 .gr-slot.tem .nome { color: var(--r); }
 .gr-slot.tem img { filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
 
-@media (prefers-reduced-motion: reduce) {
-  .gr-peca.novo, .gr-vitrine.fulgor { animation: none; }
-  button.gr-slot { transition: none; }
-  button.gr-slot:hover, button.gr-slot:focus-visible { transform: none; }
-}
+:root.sem-movimento .gr-vitrine.fulgor { animation: none; }
+:root.sem-movimento button.gr-slot:hover,
+:root.sem-movimento button.gr-slot:focus-visible { transform: none; }
 
 /* o atributo hidden precisa vencer o display:grid destes dois paineis */
 .gr-tranca[hidden], .gr-mesa[hidden] { display: none; }

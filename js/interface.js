@@ -5,6 +5,32 @@
   "use strict";
 
   /* ----------------------------------------------------------
+     O interruptor de movimento
+     O sistema so decide enquanto ninguem tiver opinado. No Windows o preset
+     "melhor desempenho" desliga as animacoes e o navegador passa a reportar
+     reduce, entao muita gente cai aqui sem nunca ter pedido menos movimento.
+     ---------------------------------------------------------- */
+  (function movimento() {
+    var botao = document.getElementById("botao-movimento");
+    if (!botao) return;
+    var rotulo = botao.querySelector(".texto");
+
+    function pintar() {
+      var sem = window.MK.semMovimento;
+      botao.setAttribute("aria-pressed", sem ? "false" : "true");
+      rotulo.textContent = sem ? "Ligar o movimento" : "Desligar o movimento";
+      botao.title = window.MK.pediuPeloSistema()
+        ? "Seguindo a preferencia do seu sistema"
+        : "Sua escolha, guardada neste navegador";
+    }
+
+    pintar();
+    botao.addEventListener("click", function () {
+      window.MK.definirMovimento(window.MK.semMovimento);
+    });
+  })();
+
+  /* ----------------------------------------------------------
      4. Levantar o pano (não levante o pano)
      ---------------------------------------------------------- */
   (function pano() {

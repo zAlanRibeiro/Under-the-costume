@@ -281,18 +281,22 @@
 .susto-cartao .botao { margin-top: 6px; }
 
 /* quem pediu menos movimento recebe a revelação sem salto, clarão nem tremor */
-@media (prefers-reduced-motion: reduce) {
-  .alvo-disfarce.acariciando img,
-  .alvo-disfarce.comendo img,
-  .petisco, .faisca { animation: none; }
-  .faisca { opacity: 1; }
-  .susto-clarao, .susto-poeira { display: none; }
-  .susto.bateu { animation: none; }
-  .susto.bateu .susto-deriva { animation: none; }
-  .susto.bateu .susto-luz { animation: none; opacity: .5; }
-  .susto.bateu .susto-bicho { animation: none; transform: scale(.98) translate(0, .3%); opacity: .5; }
-  .susto.bateu .susto-cartao { animation: none; opacity: 1; }
+/* O que sai com movimento reduzido e o que ataca o corpo: o salto de escala
+   .16 -> 1.46, o tranco na cena inteira e o clarao piscando. A faisca do
+   carinho, o petisco e a poeira ficam: sao miudos, locais e lentos, e sem eles
+   o site parece morto sem que ninguem tenha pedido isso. */
+:root.sem-movimento .susto.bateu { animation: none; }
+:root.sem-movimento .susto.bateu .susto-deriva { animation: none; }
+:root.sem-movimento .susto.bateu .susto-bicho {
+  animation: none; transform: scale(.98) translate(0, .3%); opacity: .5;
 }
+:root.sem-movimento .susto.bateu .susto-luz { animation: none; opacity: .5; }
+:root.sem-movimento .susto.bateu .susto-cartao { animation: none; opacity: 1; }
+
+/* o clarao fica de fora em qualquer caso: e estrobo branco, questao de
+   fotossensibilidade, e nao depende do interruptor nem de o JS ter carregado */
+@media (prefers-reduced-motion: reduce) { .susto-clarao { display: none; } }
+:root.sem-movimento .susto-clarao { display: none; }
 
 /* o atributo hidden precisa vencer o display:grid do overlay */
 .susto[hidden] { display: none; }

@@ -67,9 +67,7 @@
 .carta .raridade.topo { color: var(--fada); }
 .carta .art { font-family: var(--dados); font-size: 9.5px; color: var(--tinta-fraca); opacity: .82; }
 
-@media (prefers-reduced-motion: reduce) {
-  .carta:hover img { transform: none; }
-}
+:root.sem-movimento .carta:hover img { transform: none; }
 
 /* --- itens da build, com o sprite do jogo ao lado --- */
 .dd-item { display: flex; flex-direction: column; gap: 8px; }
