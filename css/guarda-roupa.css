@@ -10,6 +10,23 @@
 .r-ultra   { --r: var(--fada); --r-fraco: rgba(224,143,176,.16); }
 .r-secreta { --r: #B78BEB; --r-fraco: rgba(183,139,235,.20); }
 
+/* ---------- o aviso de que nada esta sendo gravado ----------
+   Nota de rodape, nao alarme: o site continua jogavel, so nao lembra.
+   [hidden] perde para qualquer display declarado, e neste projeto esse
+   esquecimento ja mordeu tres vezes — por isso a segunda regra. */
+.gr-aviso {
+  display: flex; gap: 10px; align-items: baseline;
+  border: 1px solid var(--fada); border-left-width: 3px;
+  background: rgba(224,143,176,.07);
+  padding: 12px 16px; margin: 0;
+  font-family: var(--dados); font-size: 12px; line-height: 1.55;
+  color: var(--tinta-fraca); max-width: 76ch;
+}
+.gr-aviso::before {
+  content: "\26A0"; color: var(--fada); font-size: 13px; flex: none;
+}
+.gr-aviso[hidden] { display: none; }
+
 /* ---------- estado trancado ---------- */
 .gr-tranca {
   border: 1px dashed var(--borda-forte);

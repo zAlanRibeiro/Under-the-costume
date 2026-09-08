@@ -38,7 +38,7 @@
     /* quem pediu menos movimento comeca com a rolagem rapida ligada, mas pode
        desmarcar: a preferencia do sistema define o padrao, nao uma trava */
     var s = { liberado: false, retalhos: 0, tem: {}, semRara: 0, semSecreta: 0,
-              rapida: semMovimento };
+              rapida: semMovimento, salvoEm: 0 };
 
     /* a fita corre por peças sorteadas e para na que saiu de verdade */
     var LARGURA_ITEM = 168;   /* precisa bater com o .gr-fita > figure do CSS */
@@ -47,24 +47,67 @@
     var DURACAO = 2500;
     var girando = false;
 
-    /* --- persistência: some sem drama se o navegador bloquear --- */
-    function carregar() {
-      try {
-        var bruto = localStorage.getItem(CHAVE);
-        if (!bruto) return;
-        var d = JSON.parse(bruto);
-        if (d && typeof d === "object") {
-          s.liberado  = !!d.liberado;
-          s.retalhos  = Math.max(0, d.retalhos | 0);
-          s.tem       = (d.tem && typeof d.tem === "object") ? d.tem : {};
-          s.semRara   = d.semRara | 0;
-          s.semSecreta = d.semSecreta | 0;
-          if (typeof d.rapida === "boolean") s.rapida = d.rapida;
-        }
-      } catch (e) { /* segue sem histórico salvo */ }
+    /* --- persistência: duas gavetas, e a página avisa se as duas fecharem --- */
+    var elAviso = document.getElementById("gr-aviso");
+    var mexeu = false;          /* já costurou nesta sessão */
+
+    /* Só entram ids que existem hoje e contagens que são inteiro positivo: uma
+       cópia corrompida não pode encher o varal de peças que não existem.
+       Math.floor(undefined) é NaN, e NaN > 0 é false — o filtro cai sozinho. */
+    function limpar(tem) {
+      var limpo = {};
+      if (!tem || typeof tem !== "object") return limpo;
+      for (var i = 0; i < PECAS.length; i++) {
+        var n = Math.floor(tem[PECAS[i].id]);
+        if (n > 0) limpo[PECAS[i].id] = n;
+      }
+      return limpo;
     }
+
+    /* serve às duas gavetas, para as duas passarem pela mesma peneira */
+    function aplicar(d) {
+      if (!d || typeof d !== "object") return false;
+      s.liberado   = !!d.liberado;
+      s.retalhos   = Math.max(0, d.retalhos | 0);
+      s.tem        = limpar(d.tem);
+      s.semRara    = d.semRara | 0;
+      s.semSecreta = d.semSecreta | 0;
+      /* nada de | 0 aqui: Date.now() nao cabe num Int32 e daria a volta */
+      s.salvoEm    = Math.max(0, +d.salvoEm || 0);
+      if (typeof d.rapida === "boolean") s.rapida = d.rapida;
+      return true;
+    }
+
     function salvar() {
-      try { localStorage.setItem(CHAVE, JSON.stringify(s)); } catch (e) {}
+      s.salvoEm = Date.now();
+      window.MK.cofre.gravar(CHAVE, s);
+      avisarArmazenamento();
+    }
+
+    /* perder a coleção calada é o pior dos finais: se nem o localStorage nem o
+       IndexedDB aceitarem, a gaveta diz isso antes de a pessoa investir a noite */
+    function avisarArmazenamento() {
+      if (!elAviso) return;
+      var travado = window.MK.cofre.bloqueado();
+      if (travado && !elAviso.textContent) {
+        elAviso.textContent = "Este navegador não está guardando nada: o que ele " +
+          "costurar agora some quando você fechar a aba. Costuma ser janela " +
+          "anônima, ou dados de site bloqueados nas permissões.";
+      }
+      elAviso.hidden = !travado;
+    }
+
+    /* põe a tela inteira de acordo com s, venha ele de qual gaveta vier */
+    function repintar() {
+      chkRapida.checked = s.rapida;
+      if (s.liberado) {
+        liberar(false);         /* nunca liberar(true): esse paga os +10 de novo */
+      } else {
+        tranca.hidden = false;
+        mesa.hidden = true;
+        pintar();
+        montarColecao();
+      }
     }
 
     /* no site local as imagens vêm da pasta; no arquivo único elas chegam
@@ -200,6 +243,10 @@
 
     function puxar(quantos) {
       if (girando || s.retalhos < quantos) return;
+      mexeu = true;
+      /* só agora existe coleção a perder: é a hora de pedir ao navegador que
+         não a despeje — e não no load, quando não havia nada em jogo */
+      window.MK.cofre.fixar();
       s.retalhos -= quantos;
       var melhor = null;
       var ordem = { comum: 0, incomum: 1, rara: 2, ultra: 3, secreta: 4 };
@@ -313,15 +360,29 @@
       salvar();
     });
 
-    carregar();
-    /* depois de carregar, senao a caixinha mostra o padrao em vez do que a
-       pessoa escolheu da ultima vez */
-    chkRapida.checked = s.rapida;
-    if (s.liberado) {
-      liberar(false);
-    } else {
-      pintar();
-      montarColecao();
-    }
+    /* a gaveta rápida primeiro, e síncrona: é o caso comum, e assim o varal
+       nunca pisca vazio antes de se preencher */
+    aplicar(window.MK.cofre.ler(CHAVE));
+    repintar();
+    avisarArmazenamento();
+
+    /* A segunda gaveta chega alguns milissegundos depois. Só vale se for mais
+       nova — que é o caso em que o localStorage foi limpo e o IndexedDB não.
+       Somar as duas seria errado: retalho é moeda, e somar contaria o mesmo
+       carinho duas vezes. O mais recente vence inteiro, e recompõe a outra. */
+    window.MK.cofre.lerFundo(CHAVE, function (d) {
+      /* quem já costurou nesta sessão manda: a cópia de fundo não pode puxar
+         o varal debaixo de quem está jogando (e salvar() já escreveu as duas) */
+      if (mexeu) return;
+
+      if (d && (+d.salvoEm || 0) > s.salvoEm && aplicar(d)) repintar();
+
+      /* Nos dois sentidos. Quem tem a cópia mais nova recompõe a outra gaveta:
+         sem isto, apagar só o IndexedDB deixaria a segunda cópia faltando até
+         a próxima costura, e a promessa das duas gavetas valeria pela metade.
+         gravar() e não salvar(), porque isto é restauração e não progresso
+         novo: o salvoEm segue sendo o da costura que originou a cópia. */
+      if (s.salvoEm > 0) window.MK.cofre.gravar(CHAVE, s);
+    });
   })();
 })();

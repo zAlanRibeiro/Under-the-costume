@@ -35,6 +35,12 @@ for f in "$raiz"/imagens/tcg/*.jpg; do
 done
 
 {
+  # O <head> inteiro fica de fora do recorte abaixo, e junto com ele ia o meta
+  # charset do index.html. O GitHub Pages declara utf-8 no cabecalho HTTP e o
+  # Artifact poe o seu proprio meta, entao os dois disfarcavam; aberto direto do
+  # disco, ou servido por quem nao declara nada, todo acento do site virava
+  # mojibake ("coleção" -> "coleÃ§Ã£o").
+  echo '<meta charset="utf-8">'
   echo '<title>Sob o Pano de Mimikyu</title>'
   grep 'fonts\.' "$raiz/index.html"
   echo '<style>'

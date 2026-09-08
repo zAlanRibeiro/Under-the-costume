@@ -52,7 +52,7 @@ js/                   comum.js precisa vir primeiro
   fantasias.js        dados das 50 roupinhas
   fundo.js            poeira em canvas e o olhar que segue o cursor
   palco.js            carinho, comida, amizade, disfarce e susto
-  guarda-roupa.js     sorteio, roleta, varal e localStorage
+  guarda-roupa.js     sorteio, roleta, varal e as duas gavetas de gravacao
   anatomia.js         foco de luz no diagrama
   interface.js        o pano, copiar build e navegação
 
@@ -92,7 +92,8 @@ Junta HTML, CSS, JS e **todas** as imagens (como data URI) num único `dist/inde
 - **Sem dependências** — nada de framework, nada de CDN. Só as fontes do Google Fonts.
 - **Fundo em canvas** — poeira em suspensão, com uma versão estática para quem pede menos movimento.
 - **`prefers-reduced-motion`** é respeitado em toda parte, inclusive no susto, que perde o salto, o clarão, o tremor e o som.
-- **O gacha salva em `localStorage`**, dentro de `try/catch` — se o navegador bloquear, a página segue funcionando.
+- **A coleção do gacha é guardada em duas gavetas** (`MK.cofre`, em `comum.js`): `localStorage` para ler rápido e síncrono no boot, e IndexedDB como segunda cópia. Um carimbo `salvoEm` decide quem está mais novo quando as duas discordam, e a mais nova recompõe a outra — nos dois sentidos. Se as duas estiverem trancadas, a página **diz isso** em vez de perder tudo calada.
+- **A amizade não é salva de propósito** — ela recomeça do zero a cada visita. Só a gaveta destrancada e as roupinhas atravessam.
 - **As roupinhas tiveram o fundo removido por flood fill a partir das bordas**, não por chave de cor, para preservar o branco interno do jaleco do médico, do chapéu do chef e dos ossos do esqueleto.
 
 ## Direitos e afiliação
