@@ -43,6 +43,19 @@ done
     cat "$raiz/css/$m.css"
   done
   echo '</style>'
+
+  # O script que decide movimento mora no <head> do index.html, e o corpo abaixo
+  # so copia o que esta entre <body> e </body> — sem isto, a classe sem-movimento
+  # nunca e pintada no <html> e as 20 regras que dependem dela ficam mortas no
+  # arquivo unico. Aqui ele entra logo apos o CSS, antes de qualquer conteudo.
+  awk '
+    /<head>/   { dentro = 1; next }
+    /<\/head>/ { dentro = 0 }
+    dentro && /<script>/ { copiando = 1 }
+    copiando   { print }
+    copiando && /<\/script>/ { copiando = 0 }
+  ' "$raiz/index.html"
+
   awk '/<body>/{f=1;next} /<\/body>/{f=0} f' "$raiz/index.html" \
     | grep -vE '<script src="js/' \
     | sed -f "$subs"
