@@ -67,6 +67,9 @@ h1 {
   position: relative; width: min(400px, 92%); border-radius: var(--raio);
   /* ele se inclina de leve na direção de quem está olhando */
   transform: translate(var(--olhar-x, 0px), var(--olhar-y, 0px));
+  /* no toque, arrastar na vertical rola a página e na horizontal é carinho;
+     sem isto o navegador trata todo arrasto como rolagem e cancela o ponteiro */
+  touch-action: pan-y;
 }
 .alvo-disfarce img {
   width: 100%; height: auto; display: block;

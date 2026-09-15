@@ -17,7 +17,8 @@
 
     function pintar() {
       var sem = window.MK.semMovimento;
-      botao.setAttribute("aria-pressed", sem ? "false" : "true");
+      /* sem aria-pressed: o texto ja diz a acao, e os dois juntos fariam o leitor
+         de tela anunciar "Desligar o movimento, pressionado" */
       rotulo.textContent = sem ? "Ligar o movimento" : "Desligar o movimento";
       botao.title = window.MK.pediuPeloSistema()
         ? "Seguindo a preferencia do seu sistema"
@@ -40,20 +41,13 @@
     if (!botao || !revelacao) return;
 
     botao.addEventListener("click", function () {
-      revelacao.hidden = false;
-      aviso.classList.add("revelado");
-      botao.textContent = "Fechar o pano";
-      botao.classList.add("discreto");
-      botao.replaceWith(botao.cloneNode(true));
-      var novo = document.getElementById("botao-pano");
-      novo.addEventListener("click", function () {
-        revelacao.hidden = true;
-        aviso.classList.remove("revelado");
-        novo.textContent = "Levantar o pano mesmo assim";
-        novo.classList.remove("discreto");
-        location.hash = "#pano";
-      }, { once: true });
-    }, { once: true });
+      var abrir = revelacao.hidden;
+      revelacao.hidden = !abrir;
+      aviso.classList.toggle("revelado", abrir);
+      botao.textContent = abrir ? "Fechar o pano" : "Levantar o pano mesmo assim";
+      botao.classList.toggle("discreto", abrir);
+      if (!abrir) location.hash = "#pano";
+    });
   })();
 
   /* ----------------------------------------------------------

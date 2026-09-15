@@ -188,10 +188,16 @@
       }
     }
 
-    function mostrar(res) {
-      mostrarFicha(res.peca, res.repetida
+    /* numa noite de cinco a roleta para só na melhor peça; as outras quatro
+       também foram para o varal, e o rodapé diz quais */
+    function mostrar(res, todas) {
+      var rodape = res.repetida
         ? "Ele já tinha feito esse. Desmanchou e devolveu o retalho."
-        : "Peça nova no varal.", true);
+        : "Peça nova no varal.";
+      var resto = todas.filter(function (r) { return r !== res; })
+        .map(function (r) { return r.peca.nome + (r.repetida ? " (repetida)" : ""); });
+      if (resto.length) rodape += " Também saíram: " + resto.join(", ") + ".";
+      mostrarFicha(res.peca, rodape, true);
     }
 
     /* --- a roleta ------------------------------------------------------
@@ -248,10 +254,11 @@
          não a despeje — e não no load, quando não havia nada em jogo */
       window.MK.cofre.fixar();
       s.retalhos -= quantos;
-      var melhor = null;
+      var melhor = null, todas = [];
       var ordem = { comum: 0, incomum: 1, rara: 2, ultra: 3, secreta: 4 };
       for (var i = 0; i < quantos; i++) {
         var res = costurar();
+        todas.push(res);
         if (!melhor || ordem[res.peca.raridade] > ordem[melhor.peca.raridade]) melhor = res;
       }
       /* grava antes de girar: o sorteio já aconteceu e não pode se perder se a
@@ -259,7 +266,7 @@
       salvar();
       pintarSaldo();
       girar(melhor, function () {
-        mostrar(melhor);
+        mostrar(melhor, todas);
         pintar();
         montarColecao();
       });
@@ -362,27 +369,31 @@
 
     /* a gaveta rápida primeiro, e síncrona: é o caso comum, e assim o varal
        nunca pisca vazio antes de se preencher */
-    aplicar(window.MK.cofre.ler(CHAVE));
+    var local = window.MK.cofre.ler(CHAVE);
+    aplicar(local);
     repintar();
-    avisarArmazenamento();
 
-    /* A segunda gaveta chega alguns milissegundos depois. Só vale se for mais
-       nova — que é o caso em que o localStorage foi limpo e o IndexedDB não.
+    /* A segunda gaveta chega alguns milissegundos depois. Vale se for mais
+       nova, ou se a local nem existir — limpa, ou com o JSON estragado.
        Somar as duas seria errado: retalho é moeda, e somar contaria o mesmo
        carinho duas vezes. O mais recente vence inteiro, e recompõe a outra. */
     window.MK.cofre.lerFundo(CHAVE, function (d) {
+      /* só aqui as duas gavetas já responderam, então só aqui dá para saber
+         se as duas recusaram */
+      avisarArmazenamento();
+
       /* quem já costurou nesta sessão manda: a cópia de fundo não pode puxar
          o varal debaixo de quem está jogando (e salvar() já escreveu as duas) */
       if (mexeu) return;
 
-      if (d && (+d.salvoEm || 0) > s.salvoEm && aplicar(d)) repintar();
+      if (d && (!local || (+d.salvoEm || 0) > s.salvoEm) && aplicar(d)) repintar();
+      if (!local && !d) return;   /* visitante novo: não há o que recompor */
 
-      /* Nos dois sentidos. Quem tem a cópia mais nova recompõe a outra gaveta:
-         sem isto, apagar só o IndexedDB deixaria a segunda cópia faltando até
-         a próxima costura, e a promessa das duas gavetas valeria pela metade.
-         gravar() e não salvar(), porque isto é restauração e não progresso
-         novo: o salvoEm segue sendo o da costura que originou a cópia. */
-      if (s.salvoEm > 0) window.MK.cofre.gravar(CHAVE, s);
+      /* Save de antes das duas gavetas não tem salvoEm, e sem carimbo nenhuma
+         cópia venceria a comparação acima: salvar() carimba e grava nas duas.
+         Com carimbo, gravar() e não salvar(), porque isto é restauração e não
+         progresso novo — o salvoEm segue sendo o da costura original. */
+      if (s.salvoEm) window.MK.cofre.gravar(CHAVE, s); else salvar();
     });
   })();
 })();

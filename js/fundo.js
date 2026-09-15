@@ -63,10 +63,7 @@
       requestAnimationFrame(pintar);
     }
 
-    dimensionar();
-    window.addEventListener("resize", dimensionar);
-
-    if (semMovimento) {
+    function parado() {
       for (var i = 0; i < motas.length; i++) {
         var m = motas[i];
         ctx.beginPath();
@@ -74,9 +71,16 @@
         ctx.fillStyle = "rgba(227, 200, 106, " + (m.alfa * 0.7).toFixed(3) + ")";
         ctx.fill();
       }
-    } else {
-      requestAnimationFrame(pintar);
     }
+
+    dimensionar();
+    if (semMovimento) parado(); else requestAnimationFrame(pintar);
+    window.addEventListener("resize", function () {
+      dimensionar();
+      /* mudar o width apaga o canvas, e sem o loop do pintar() ninguem
+         redesenharia. No celular a barra de endereco ja dispara resize. */
+      if (semMovimento) parado();
+    });
   })();
 
   /* ----------------------------------------------------------

@@ -29,7 +29,9 @@ window.MK = (function () {
      pagina dizer isso em voz alta, em vez de perder tudo calada.
      ========================================================== */
   var BANCO = "mimikyu", LOJA = "estado";
-  var travado = false;    /* algum acesso ja lancou */
+  /* uma bandeira por gaveta: o aviso so vale quando as DUAS recusam. Com uma
+     so, a outra guardou, e dizer "nao esta guardando nada" seria mentira */
+  var semLocal = false, semBanco = false;
   var fixado = false;
 
   function pedir(versao, aoAbrir, aoFaltar) {
@@ -40,19 +42,20 @@ window.MK = (function () {
          existir. Fixar 1 aqui daria VersionError para sempre depois de um
          conserto ter subido a versao, que e o proximo bloco. */
       req = versao ? indexedDB.open(BANCO, versao) : indexedDB.open(BANCO);
-    } catch (e) { travado = true; aoAbrir(null); return; }
+    } catch (e) { semBanco = true; aoAbrir(null); return; }
     req.onupgradeneeded = function () {
       var db = req.result;
       if (!db.objectStoreNames.contains(LOJA)) db.createObjectStore(LOJA);
     };
     req.onsuccess = function () {
       var db = req.result;
+      semBanco = false;
       if (aoFaltar && !db.objectStoreNames.contains(LOJA)) { aoFaltar(db); return; }
       aoAbrir(db);
     };
     /* os dois caminhos tristes precisam responder: um callback pendurado
        deixaria o boot esperando uma gaveta que nunca vai abrir */
-    req.onerror   = function () { aoAbrir(null); };
+    req.onerror   = function () { semBanco = true; aoAbrir(null); };
     req.onblocked = function () { aoAbrir(null); };
   }
 
@@ -72,15 +75,19 @@ window.MK = (function () {
   var cofre = {
     /* sincrono, para o boot pintar sem piscar o varal vazio */
     ler: function (chave) {
-      try {
-        var bruto = localStorage.getItem(chave);
-        return bruto ? JSON.parse(bruto) : null;
-      } catch (e) { travado = true; return null; }
+      var bruto;
+      try { bruto = localStorage.getItem(chave); } catch (e) { semLocal = true; return null; }
+      /* JSON quebrado e save estragado, nao gaveta trancada: devolve nada e nao
+         acende o aviso. A copia do banco, se houver, cobre o buraco. */
+      try { return bruto ? JSON.parse(bruto) : null; } catch (e) { return null; }
     },
 
     gravar: function (chave, obj) {
-      var texto = JSON.stringify(obj), ok = true;
-      try { localStorage.setItem(chave, texto); } catch (e) { travado = true; ok = false; }
+      var texto = JSON.stringify(obj);
+      /* recusa por bloqueio ou por cota cheia — a cota e da origem inteira,
+         dividida com os outros projetos no mesmo usuario.github.io. Se voltar
+         a aceitar, a bandeira abaixa. */
+      try { localStorage.setItem(chave, texto); semLocal = false; } catch (e) { semLocal = true; }
       abrir(function (db) {
         if (!db) return;
         try {
@@ -91,7 +98,6 @@ window.MK = (function () {
           t.oncomplete = t.onerror = function () { db.close(); };
         } catch (e) { db.close(); /* a gaveta rapida ja tem a copia */ }
       });
-      return ok;
     },
 
     lerFundo: function (chave, pronto) {
@@ -110,7 +116,7 @@ window.MK = (function () {
       });
     },
 
-    bloqueado: function () { return travado; },
+    bloqueado: function () { return semLocal && semBanco; },
 
     /* Tira os dados de "best-effort", a categoria que o navegador despeja
        primeiro. Nao roda no load de proposito: o Chrome decide sozinho pelo

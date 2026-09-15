@@ -61,7 +61,7 @@ imagens/              arte oficial, modelos 3D e sprites
   tcg/                as 34 cartas
   itens/ comida/      sprites de itens
 costumes.jpg          folha de referência com as 50 fantasias (fonte dos sprites)
-dados/                JSONs de origem, o script que fatia a folha e utilitários
+dados/                JSONs de origem, URLs das cartas e o script que fatia a folha
 construir.sh          empacota tudo num arquivo único em dist/
 ```
 
