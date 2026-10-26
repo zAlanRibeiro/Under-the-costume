@@ -58,8 +58,11 @@
   position: relative;   /* posicionado, para pintar por cima do canvas */
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 10px 12px;
 }
+/* no iPhone o toque pinta um flash cinza por cima de botão: aqui ele cobriria o traste */
+.rt-seta, .rt-topo button, .rt-lista button, .rt-veloc button, .rt-abrir { -webkit-tap-highlight-color: transparent; }
 /* o botão é só a área de toque e o foco; o traste que se vê é o do canvas */
 .rt-seta {
+  -webkit-user-select: none; -webkit-touch-callout: none;   /* segurar o traste não abre menu de copiar */
   aspect-ratio: 1; border-radius: 50%;
   border: 0; background: transparent; color: transparent;
   font-size: 24px; line-height: 1; cursor: pointer;
@@ -84,6 +87,68 @@
 .rt-nota[data-nota="6"] { color: var(--fada); }
 :root.com-movimento .rt-nota.pop { animation: rt-pop .3s ease-out; }
 @keyframes rt-pop { from { transform: scale(1.35); opacity: .3; } }
+
+/* ---------- no celular: a dança abre numa tela só dela ----------
+   O mesmo #rt, com outra roupa: primeiro a escolha da música, depois o close
+   do Mimikyu com a pista embaixo, perto dos polegares. */
+.rt-abrir, .rt-topo { display: none; }
+/* celular é a tela estreita, e também a de toque deitada, baixa demais para o jogo na página */
+@media (max-width: 760px), (max-height: 520px) and (pointer: coarse) {
+  .rt-abrir { display: inline-block; }
+  .rt:not(.rt-tela) { display: none; }
+}
+html.rt-travado, html.rt-travado body { overflow: hidden; }
+.rt.rt-tela {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 10px 12px max(12px, env(safe-area-inset-bottom));
+  background: var(--breu); overflow-y: auto;
+  overscroll-behavior: contain;   /* no iPhone a rolagem daqui arrastava a página de trás */
+}
+.rt-tela .rt-topo { display: flex; justify-content: space-between; gap: 8px; order: -2; }
+.rt-topo button {
+  font-family: var(--dados); font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--tinta); background: var(--cripta); border: 1px solid var(--borda-forte);
+  border-radius: var(--raio); padding: 10px 14px; cursor: pointer;
+}
+.rt-topo .rt-sair { color: var(--pano); border-color: var(--pano-fundo); }
+.rt-titulo {
+  align-self: center;
+  font-family: var(--display); font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 900; font-size: 20px; color: var(--pano-claro);
+}
+/* na escolha o canto esquerdo é o título; dançando, é o caminho de volta */
+.rt-tela.rt-escolhendo .rt-voltar, .rt-tela.rt-dancando .rt-titulo { display: none; }
+/* as cinco velocidades numa linha só, o rótulo em cima */
+.rt-tela .rt-veloc span { flex-basis: 100%; }
+.rt-tela .rt-veloc button { flex: 1; padding: 8px 0; }
+.rt-tela.rt-escolhendo .rt-palco, .rt-tela.rt-escolhendo .rt-pista { display: none; }
+.rt-tela.rt-dancando .rt-menu, .rt-tela.rt-dancando .rt-veloc { display: none; }
+.rt-tela.rt-dancando .rt-estado { order: -1; font-size: 12px; }
+.rt-tela.rt-dancando .rt-palco { flex: 1 1 42%; min-height: 0; aspect-ratio: auto; }
+.rt-tela.rt-dancando .rt-pista { flex: 1 1 58%; min-height: 0; }
+/* no close a TV vai para o canto e o placar para o outro: o palco é dele */
+.rt-tela .rt-tv { top: 10px; left: 10px; transform: none; width: 46%; border-width: 6px; }
+.rt-tela .rt-hud { left: auto; right: 12px; flex-direction: column; align-items: flex-end; gap: 2px; }
+/* o Safari do iPhone barra o autoplay: a TV vem para o meio, grande, pedindo o toque */
+.rt-tela.rt-tv-esperando .rt-tv {
+  top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; z-index: 2;
+  box-shadow: 0 0 0 3px var(--pano), 0 0 46px rgba(227, 200, 106, .5);
+}
+
+/* deitado: o Mimikyu à esquerda, a pista à direita, os botões numa faixa fina em cima */
+@media (orientation: landscape) and (max-height: 520px) {
+  .rt-tela.rt-dancando {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr); gap: 6px 12px;
+    padding: 6px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  }
+  .rt-tela.rt-dancando .rt-topo, .rt-tela.rt-dancando .rt-estado { grid-column: 1 / -1; }
+  .rt-tela.rt-dancando .rt-palco { grid-column: 1; grid-row: 3; }
+  .rt-tela.rt-dancando .rt-pista { grid-column: 2; grid-row: 3; }
+  .rt-tela.rt-dancando .rt-estado { font-size: 11px; line-height: 1.4; }
+  .rt-tela .rt-topo button { padding: 6px 12px; font-size: 11px; }
+}
 
 /* ---------- velocidade ---------- */
 .rt-veloc { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }

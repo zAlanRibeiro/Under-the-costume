@@ -66,6 +66,7 @@
      navegador preenche, e os dois só se reacertam quando se afastam.
      ---------------------------------------------------------- */
   var desvio = 0, ultimoYt = -1, ultimo = null;   // ultimo: { v: o último tempo devolvido, real: quando }
+  var amostras = [];   // [quando, tempo do vídeo menos o relógio] tocando, nos últimos segundos
   var taxa = 1, escolhida = 1;   // a velocidade que o vídeo está tocando e a que a pessoa pediu
   function tocando() {
     return !!(player && player.getPlayerState) && player.getPlayerState() === YT.PlayerState.PLAYING;
@@ -81,10 +82,17 @@
     /* até o vigia desfazer o pulo o jogo não enxerga o vídeo lá na frente:
        um quadro só bastaria para dar todas as notas do caminho como perdidas */
     if (pulou(yt, ultimo)) return ultimo.v;
-    if (!tocando()) desvio = yt - t;
+    if (!tocando()) { desvio = yt - t; amostras = []; }
     else if (yt !== ultimoYt) {
       ultimoYt = yt;
-      var erro = yt - (t + desvio);
+      /* No WebKit (o motor do Safari do iPhone) o player só atualiza o tempo a
+         cada ~250 ms, e boa parte das vezes manda o valor de uma volta atrás,
+         nunca um adiantado. O tempo certo é o teto das amostras dos últimos
+         segundos, não a mais nova: seguir cada uma fazia o relógio pular
+         ±250 ms. No Chrome a amostra é exata e o teto é ela mesma. */
+      amostras.push([real, yt - t]);
+      while (amostras[0][0] < real - 4) amostras.shift();
+      var erro = Math.max.apply(null, amostras.map(function (a) { return a[1]; })) - desvio;
       desvio += Math.abs(erro) > 0.08 ? erro : erro * 0.1;
     }
     ultimo = { v: t + desvio, real: real };
@@ -98,7 +106,10 @@
      porque a seção pode estar fora da tela. Carregar de verdade só atrasa o
      vídeo, nunca adianta: não dispara. */
   var vigiado = null;   // { v: onde o vídeo estava, real: quando }
+  var esperaPlay = 0;   // o relógio que decide que o autoplay foi barrado
+  var parado0 = 0;      // desde quando o player diz "tocando" com o clipe ainda no zero
   setInterval(function () {
+    if (player && player.getCurrentTime && etapa === "carregando") largar();
     if (!player || !player.getCurrentTime || (etapa !== "jogando" && etapa !== "ouvindo")) { vigiado = null; return; }
     var yt = player.getCurrentTime();
     if (pulou(yt, vigiado)) { player.seekTo(vigiado.v, true); return; }
@@ -109,6 +120,7 @@
   function mudouTaxa(e) {
     taxa = e.data;
     desvio = player.getCurrentTime() - performance.now() / 1000 * taxa;
+    amostras = [];   // as de antes estavam em outra velocidade
     /* os ataques já ouvidos estavam em outro andamento: a escuta recomeça a janela */
     if (escuta) { escuta.t = []; escuta.e = []; escuta.palpites = []; escuta.antes = null; escuta.ponte = null; }
   }
@@ -159,8 +171,10 @@
   }
 
   function tocar(m, botao) {
+    if (emTela()) mostrar("danca");
     musica = m;
     etapa = "carregando";
+    parado0 = 0;
     ultimo = null;   // o tempo do vídeo anterior não serve de referência para o novo
     ajuste = 0;
     fora = [];
@@ -179,7 +193,7 @@
           playerVars: { playsinline: 1, rel: 0, disablekb: 1, controls: 0, fs: 0, iv_load_policy: 3 },
           events: {
             /* se trocou de música antes de o player ficar pronto, vale a última */
-            onReady: function (e) { e.target.loadVideoById(musica.video); },
+            onReady: function (e) { if (musica) e.target.loadVideoById(musica.video); },
             onStateChange: mudou,
             onPlaybackRateChange: mudouTaxa,
             onError: recusou
@@ -197,17 +211,20 @@
   function mudou(e) {
     /* a TV só aceita clique antes de começar, para o caso de o navegador
        barrar o autoplay; tocando, o clique pausaria ou abriria outro vídeo */
-    rt.classList.toggle("rt-tv-livre", e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.CUED);
+    var semPlay = e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.CUED;
+    rt.classList.toggle("rt-tv-livre", semPlay);
+    /* parado sem começar por mais de 1,5 s é o navegador barrando o autoplay
+       (o Safari do iPhone sempre barra): pede o toque, e no celular a TV cresce */
+    clearTimeout(esperaPlay);
+    rt.classList.remove("rt-tv-esperando");
+    if (semPlay) esperaPlay = setTimeout(function () {
+      if (etapa !== "carregando") return;
+      rt.classList.add("rt-tv-esperando");
+      dizer("O navegador não deixou o clipe começar sozinho: toque na TV.");
+    }, 1500);
     /* o YouTube volta para 1× a cada vídeo novo */
     if (e.data === YT.PlayerState.PLAYING && player.getPlaybackRate() !== escolhida) player.setPlaybackRate(escolhida);
-    if (e.data === YT.PlayerState.PLAYING && etapa === "carregando") {
-      if (FITA[musica.video]) comecarFita(FITA[musica.video]);
-      else {
-        etapa = "ouvindo";
-        boneco.virar(Math.PI);
-        dizer("Ele está vidrado na TV, ouvindo para pegar o ritmo…");
-      }
-    }
+    if (e.data === YT.PlayerState.PLAYING && etapa === "carregando") largar();
     if (e.data !== YT.PlayerState.ENDED) return;
     if (etapa === "jogando") terminar();
     if (etapa === "ouvindo") {
@@ -216,6 +233,31 @@
       dizer("A música acabou e ele não achou uma batida firme. Tente outra, ou diga o BPM.");
     }
   }
+
+  /* "Tocando" chega também no anúncio antes do clipe, e durante o anúncio o
+     player informa o tempo do clipe, parado no zero. Largar ali faria o
+     relógio do jogo correr o anúncio inteiro: nas músicas de abertura curta
+     as primeiras notas viravam erro, e no link novo ele ouvia a música do
+     anúncio. Então o jogo só larga quando o tempo do clipe anda. */
+  function largar() {
+    if (!tocando()) { parado0 = 0; return; }
+    if (player.getCurrentTime() < 0.3) {
+      if (!parado0) parado0 = performance.now();
+      else if (performance.now() - parado0 > 1500 && estado.textContent !== ANUNCIO) dizer(ANUNCIO);
+      return;
+    }
+    parado0 = 0;
+    /* o relógio correu durante o anúncio com o clipe parado: recomeça do clipe */
+    ultimo = null;
+    desvio = player.getCurrentTime() - performance.now() / 1000 * taxa;
+    if (FITA[musica.video]) { comecarFita(FITA[musica.video]); return; }
+    etapa = "ouvindo";
+    /* o que a escuta juntou até aqui era o anúncio */
+    if (escuta) { escuta.t = []; escuta.e = []; escuta.palpites = []; escuta.antes = null; }
+    boneco.virar(Math.PI);
+    dizer("Ele está vidrado na TV, ouvindo para pegar o ritmo…");
+  }
+  var ANUNCIO = "Anúncio do YouTube na TV. O jogo começa junto com o clipe.";
 
   function recusou(e) {
     etapa = "parado";
@@ -914,6 +956,10 @@
     desenharPista(t);
     /* sem grade ainda ele balança num tempo qualquer, só assistindo */
     boneco.animar(etapa === "jogando" ? batidaEm(t) : ms / 600, dt);
+    /* no close do celular a câmera chega perto e acompanha os passos dele */
+    var perto = rt.classList.contains("rt-dancando"), cx = perto ? boneco.raiz.position.x * 0.8 : 0;
+    camera.position.set(cx, perto ? 1.3 : 1.6, perto ? 4.6 : 7);
+    camera.lookAt(cx, perto ? 1.1 : 1.5, 0);
     efeito.render(cena, camera);
   }
 
@@ -938,7 +984,7 @@
     alvo = (b0.top + b0.height / 2 - caixa.top) * dpr;
     raio = b0.width / 2 * dpr * 0.9;
     if (!rodando) desenharPista(0);   // a pista aparece antes de o 3D descer
-    if (!renderer) return;
+    if (!renderer || !palco.clientWidth || !palco.clientHeight) return;   // escondido, na escolha do celular
     renderer.setSize(palco.clientWidth, palco.clientHeight, false);
     camera.aspect = palco.clientWidth / palco.clientHeight;
     camera.updateProjectionMatrix();
@@ -1012,6 +1058,55 @@
     pedirAudio().then(function () { tocar(m, null); }, recusouAudio);
   });
 
+  /* ----------------------------------------------------------
+     A tela da dança, no celular
+     No meio da página o jogo fica espremido; lá ele abre numa tela cheia só
+     dele, primeiro na escolha da música e depois no close do Mimikyu com a
+     pista. É o mesmo #rt com outra roupa (css/ritmo.css): nada do jogo se
+     repete. Abrir empilha uma entrada no histórico, para o voltar do
+     aparelho fechar a dança como fecharia uma página.
+     ---------------------------------------------------------- */
+  var abrir = document.getElementById("rt-abrir");
+  function emTela() { return rt.classList.contains("rt-tela"); }
+  function mostrar(qual) {   // "escolha" ou "danca"
+    rt.classList.toggle("rt-escolhendo", qual === "escolha");
+    rt.classList.toggle("rt-dancando", qual === "danca");
+  }
+  function parar() {
+    pararDeOuvir();
+    etapa = "parado";
+    musica = null;   // um carregamento ainda no meio do caminho não toca mais nada
+    if (player && player.stopVideo) player.stopVideo();
+    if (boneco) boneco.virar(Math.PI);
+    faixas.forEach(function (b) { b.removeAttribute("aria-current"); });
+    marca.textContent = "";
+    clearTimeout(esperaPlay);
+    rt.classList.remove("rt-tv-esperando");
+    dizer("Escolha uma música.");
+  }
+  function sair() {
+    parar();
+    rt.classList.remove("rt-tela", "rt-escolhendo", "rt-dancando");
+    rt.removeAttribute("role");
+    rt.removeAttribute("aria-modal");
+    document.documentElement.classList.remove("rt-travado");
+    abrir.focus();
+  }
+  abrir.addEventListener("click", function () {
+    rt.classList.add("rt-tela");
+    rt.setAttribute("role", "dialog");
+    rt.setAttribute("aria-modal", "true");
+    mostrar("escolha");
+    document.documentElement.classList.add("rt-travado");
+    history.pushState({ danca: true }, "");
+    rt.focus({ preventScroll: true });
+  });
+  document.getElementById("rt-voltar").addEventListener("click", function () { parar(); mostrar("escolha"); });
+  document.getElementById("rt-sair").addEventListener("click", function () { history.back(); });
+  window.addEventListener("popstate", function () { if (emTela()) sair(); });
+
   new IntersectionObserver(function (e) { visivel = e[0].isIntersecting; ligar(); }).observe(rt);
-  new ResizeObserver(ajustar).observe(rt);
+  /* o palco e a pista também: na tela do celular eles aparecem e somem sem o #rt mudar de tamanho */
+  var medida = new ResizeObserver(ajustar);
+  [rt, palco, trilho].forEach(function (el) { medida.observe(el); });
 })();

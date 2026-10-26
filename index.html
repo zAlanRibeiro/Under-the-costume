@@ -978,8 +978,18 @@ Adamant Nature
       <h2>Ele aprendeu a dançar vendo TV</h2>
       <p class="intro">Quando a casa dorme, ele liga a televisão baixinho e copia os passos do clipe. Escolha uma música e aperte as setas na hora em que a nota chega no botão: cada acerto vira um passo dele.</p>
 
+      <!-- só no celular: lá o jogo abre numa tela só dele, em vez de espremido aqui -->
+      <button type="button" class="botao rt-abrir" id="rt-abrir">Abrir a pista de dança</button>
+
       <!-- tabindex: é para cá que o foco volta quando alguém clica na TV -->
-      <div class="rt" id="rt" tabindex="-1">
+      <div class="rt" id="rt" tabindex="-1" aria-label="Pista de dança">
+        <!-- só na tela cheia do celular -->
+        <div class="rt-topo">
+          <span class="rt-titulo" aria-hidden="true">Pista de dança</span>
+          <button type="button" class="rt-voltar" id="rt-voltar">&larr; Escolher música</button>
+          <button type="button" class="rt-sair" id="rt-sair">Sair da dança &times;</button>
+        </div>
+
         <div class="rt-palco" id="rt-palco">
           <div class="rt-tv"><div id="rt-video"></div></div>
           <!-- só até o 3D descer -->
