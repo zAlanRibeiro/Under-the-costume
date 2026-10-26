@@ -86,6 +86,9 @@
 .rt-nota[data-nota="5"] { color: var(--tinta-fraca); }
 .rt-nota[data-nota="6"] { color: var(--fada); }
 :root.com-movimento .rt-nota.pop { animation: rt-pop .3s ease-out; }
+/* retalho ganho: o contador pula, e com movimento reduzido só acende */
+.rt-hud .pop b { color: var(--fada); }
+:root.com-movimento .rt-hud .pop b { display: inline-block; animation: rt-pop .4s ease-out; }
 @keyframes rt-pop { from { transform: scale(1.35); opacity: .3; } }
 
 /* ---------- no celular: a dança abre numa tela só dela ----------

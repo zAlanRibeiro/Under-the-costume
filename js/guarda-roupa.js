@@ -339,7 +339,10 @@
     });
 
     document.addEventListener("mimikyu:retalho", function (e) {
-      if (!s.liberado) return;
+      /* o da pista de dança vem com guardar: com a gaveta trancada ele espera
+         lá dentro e aparece quando ela abrir. O do palco só nasce na amizade
+         máxima, então trancado ele não chega. */
+      if (!s.liberado && !(e.detail && e.detail.guardar)) return;
       s.retalhos += (e.detail && e.detail.quantos) || 1;
       salvar();
       pintar();

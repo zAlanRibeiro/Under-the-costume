@@ -31,6 +31,7 @@
   ];
   var RUIM = 5, ERROU = 6, LARGA = NOTAS[RUIM].janela;
   var ALCANCE = 0.35;  // até onde um toque ainda ensina a grade, mesmo sem acertar
+  var POR_RETALHO = 25;   // notas de combo por retalho, como os 25 de afeto do palco
   var DESCIDA = 1.6;   // segundos de uma nota do topo da pista até o botão
   var SETAS = { ArrowLeft: 0, ArrowDown: 1, ArrowUp: 2, ArrowRight: 3 };
   var CORES = ["#2BD95F", "#FF3B4E", "#FFD338", "#3B8BFF"];    // verde, vermelho, amarelo, azul: as do Guitar Hero
@@ -43,6 +44,7 @@
   var marca = document.getElementById("rt-nota");
   var hudPontos = document.getElementById("rt-pontos");
   var hudCombo = document.getElementById("rt-combo");
+  var hudRetalhos = document.getElementById("rt-retalhos");
   var botoes = Array.prototype.slice.call(rt.querySelectorAll(".rt-seta"));
   var faixas = Array.prototype.slice.call(rt.querySelectorAll("#rt-lista button"));
 
@@ -179,7 +181,7 @@
     fora = [];
     faixas.forEach(function (b) { b.removeAttribute("aria-current"); });
     if (botao) botao.setAttribute("aria-current", "true");
-    hudPontos.textContent = hudCombo.textContent = "0";
+    hudPontos.textContent = hudCombo.textContent = hudRetalhos.textContent = "0";
     marca.textContent = "";
     dizer("Ligando a televisão… se o clipe não começar sozinho, aperte o play nela.");
 
@@ -290,7 +292,7 @@
     etapa = "jogando";
     notas = lista;
     primeira = 0;
-    placar = { pontos: 0, combo: 0, maior: 0, conta: NOTAS.map(function () { return 0; }) };
+    placar = { pontos: 0, combo: 0, maior: 0, retalhos: 0, conta: NOTAS.map(function () { return 0; }) };
     /* fica de costas, assistindo, até a primeira nota estar para chegar */
     boneco.virar(Math.PI);
     virarEm = notas.length ? quando(notas[0].x) - DESCIDA - 0.5 : 0;
@@ -318,6 +320,10 @@
        na janela da nota seguinte e o pulo não vem; se isso aparecer, guardar
        o atraso por seta em vez de por toque. */
     if (!certa) {
+      /* toque numa seta sem nota quebra o combo, como no Guitar Hero: sem
+         isso, apertar as quatro em toda batida fechava o combo e enchia a
+         gaveta de retalho */
+      if (placar.combo) { placar.combo = 0; hudCombo.textContent = 0; }
       if (!perto) return;
       fora.push(perto.erro);
       if (fora.length > 4) fora.shift();
@@ -340,6 +346,10 @@
     placar.conta[g]++;
     placar.combo = g >= RUIM ? 0 : placar.combo + 1;
     placar.maior = Math.max(placar.maior, placar.combo);
+    /* A regra da loja: cada 25 notas de combo viram um retalho para o
+       guarda-roupa, como cada 25 de afeto lá no palco. Devagar rende menos
+       (a 0,5× são 50), senão tocar devagar seria o jeito fácil de juntar. */
+    if (placar.combo && placar.combo % Math.round(POR_RETALHO / Math.min(1, taxa)) === 0) ganharRetalho();
     if (g >= RUIM) boneco.tropecar();
     hudPontos.textContent = placar.pontos;
     hudCombo.textContent = placar.combo;
@@ -350,13 +360,25 @@
     marca.classList.add("pop");
   }
 
+  function ganharRetalho() {
+    placar.retalhos++;
+    hudRetalhos.textContent = placar.retalhos;
+    var hud = hudRetalhos.parentNode;
+    hud.classList.remove("pop");
+    void hud.offsetWidth;   // reinicia a animação
+    hud.classList.add("pop");
+    /* guardar: com a gaveta ainda trancada, ele espera lá dentro até ela abrir */
+    document.dispatchEvent(new CustomEvent("mimikyu:retalho", { detail: { quantos: 1, guardar: true } }));
+  }
+
   function terminar() {
     etapa = "fim";
     pararDeOuvir();
     var total = notas.length * 100 || 1;
     dizer("Fim da música. " + placar.pontos + " pontos · " +
       Math.round(placar.pontos / total * 100) + "% de precisão · maior combo " + placar.maior +
-      (taxa !== 1 ? " · a " + String(taxa).replace(".", ",") + "×" : "") + "\n" +
+      (taxa !== 1 ? " · a " + String(taxa).replace(".", ",") + "×" : "") +
+      " · " + placar.retalhos + (placar.retalhos === 1 ? " retalho" : " retalhos") + " para o guarda-roupa\n" +
       NOTAS.map(function (g, i) { return g.nome + " " + placar.conta[i]; }).join(" · "));
   }
 
