@@ -106,8 +106,7 @@
      porque a seção pode estar fora da tela. Carregar de verdade só atrasa o
      vídeo, nunca adianta: não dispara. */
   var vigiado = null;   // { v: onde o vídeo estava, real: quando }
-  var esperaPlay = 0;   // o relógio que decide que o autoplay foi barrado
-  var parado0 = 0;      // desde quando o player diz "tocando" com o clipe ainda no zero
+  var espera = null;   // { desde, yt, mexeu }: parado antes do clipe, e quando o tempo andou por último
   setInterval(function () {
     if (player && player.getCurrentTime && etapa === "carregando") largar();
     if (!player || !player.getCurrentTime || (etapa !== "jogando" && etapa !== "ouvindo")) { vigiado = null; return; }
@@ -174,7 +173,7 @@
     if (emTela()) mostrar("danca");
     musica = m;
     etapa = "carregando";
-    parado0 = 0;
+    espera = null;
     ultimo = null;   // o tempo do vídeo anterior não serve de referência para o novo
     ajuste = 0;
     fora = [];
@@ -211,17 +210,7 @@
   function mudou(e) {
     /* a TV só aceita clique antes de começar, para o caso de o navegador
        barrar o autoplay; tocando, o clique pausaria ou abriria outro vídeo */
-    var semPlay = e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.CUED;
-    rt.classList.toggle("rt-tv-livre", semPlay);
-    /* parado sem começar por mais de 1,5 s é o navegador barrando o autoplay
-       (o Safari do iPhone sempre barra): pede o toque, e no celular a TV cresce */
-    clearTimeout(esperaPlay);
-    rt.classList.remove("rt-tv-esperando");
-    if (semPlay) esperaPlay = setTimeout(function () {
-      if (etapa !== "carregando") return;
-      rt.classList.add("rt-tv-esperando");
-      dizer("O navegador não deixou o clipe começar sozinho: toque na TV.");
-    }, 1500);
+    rt.classList.toggle("rt-tv-livre", e.data === YT.PlayerState.UNSTARTED || e.data === YT.PlayerState.CUED);
     /* o YouTube volta para 1× a cada vídeo novo */
     if (e.data === YT.PlayerState.PLAYING && player.getPlaybackRate() !== escolhida) player.setPlaybackRate(escolhida);
     if (e.data === YT.PlayerState.PLAYING && etapa === "carregando") largar();
@@ -234,20 +223,31 @@
     }
   }
 
-  /* "Tocando" chega também no anúncio antes do clipe, e durante o anúncio o
-     player informa o tempo do clipe, parado no zero. Largar ali faria o
-     relógio do jogo correr o anúncio inteiro: nas músicas de abertura curta
-     as primeiras notas viravam erro, e no link novo ele ouvia a música do
-     anúncio. Então o jogo só larga quando o tempo do clipe anda. */
+  /* Antes do clipe o YouTube pode passar anúncio. Medido no site publicado:
+     durante o anúncio o player fica "não iniciado" e informa o tempo do
+     anúncio, que anda e recomeça a cada um; o clipe só chega a "tocando"
+     depois, do zero. Parado em "não iniciado" com o tempo também parado é
+     outra coisa: o navegador barrou o autoplay, como o Safari do iPhone
+     sempre faz. Nos dois casos a TV cresce e aceita toque (para pular o
+     anúncio ou dar o play); só o aviso muda. O jogo só larga com o clipe
+     tocando e o tempo dele andando, senão o relógio correria o anúncio e as
+     primeiras notas virariam erro. */
   function largar() {
-    if (!tocando()) { parado0 = 0; return; }
-    if (player.getCurrentTime() < 0.3) {
-      if (!parado0) parado0 = performance.now();
-      else if (performance.now() - parado0 > 1500 && estado.textContent !== ANUNCIO) dizer(ANUNCIO);
+    var est = player.getPlayerState(), yt = player.getCurrentTime() || 0, agora = performance.now();
+    if (est === YT.PlayerState.UNSTARTED || est === YT.PlayerState.CUED) {
+      if (!espera) espera = { desde: agora, yt: yt, mexeu: 0 };
+      if (yt !== espera.yt) { espera.yt = yt; espera.mexeu = agora; }
+      if (agora - espera.desde > 1500) {
+        rt.classList.add("rt-tv-esperando");
+        var aviso = agora - espera.mexeu < 1000 ? ANUNCIO : BARRADO;
+        if (estado.textContent !== aviso) dizer(aviso);
+      }
       return;
     }
-    parado0 = 0;
-    /* o relógio correu durante o anúncio com o clipe parado: recomeça do clipe */
+    espera = null;
+    if (est !== YT.PlayerState.PLAYING || yt < 0.3) return;   // carregando, ou o clipe ainda no zero
+    rt.classList.remove("rt-tv-esperando");
+    /* o relógio correu durante a espera: recomeça do clipe */
     ultimo = null;
     desvio = player.getCurrentTime() - performance.now() / 1000 * taxa;
     if (FITA[musica.video]) { comecarFita(FITA[musica.video]); return; }
@@ -258,6 +258,7 @@
     dizer("Ele está vidrado na TV, ouvindo para pegar o ritmo…");
   }
   var ANUNCIO = "Anúncio do YouTube na TV. O jogo começa junto com o clipe.";
+  var BARRADO = "O navegador não deixou o clipe começar sozinho: toque na TV.";
 
   function recusou(e) {
     etapa = "parado";
@@ -1080,7 +1081,7 @@
     if (boneco) boneco.virar(Math.PI);
     faixas.forEach(function (b) { b.removeAttribute("aria-current"); });
     marca.textContent = "";
-    clearTimeout(esperaPlay);
+    espera = null;
     rt.classList.remove("rt-tv-esperando");
     dizer("Escolha uma música.");
   }
