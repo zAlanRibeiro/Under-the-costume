@@ -24,6 +24,15 @@
 })();
 </script>
 
+<!-- O Three.js só desce quando alguém escolhe uma música na pista de dança;
+     o mapa só diz de onde. Precisa vir antes de qualquer import(). -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+
 <!-- a ordem importa: a cascata foi montada nesta sequência -->
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/heroi.css">
@@ -33,10 +42,12 @@
 <link rel="stylesheet" href="css/palco.css">
 <link rel="stylesheet" href="css/guarda-roupa.css">
 <link rel="stylesheet" href="css/anatomia.css">
+<link rel="stylesheet" href="css/ritmo.css">
 </head>
 <body>
 
-<!-- Ícones da página. Mimikyu em si nunca é desenhado aqui: é sempre imagem oficial. -->
+<!-- Ícones da página. Mimikyu em si nunca é desenhado aqui: é sempre imagem oficial.
+     A exceção é o modelo 3D da pista de dança (modelos/mimikyu.glb), feito por um fã. -->
 <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
   <defs>
     <symbol id="ic-fantasma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -115,6 +126,7 @@
         <a href="#habitat">Habitat</a>
         <a href="#retratos">Retratos</a>
         <a href="#roupas">Roupas</a>
+        <a href="#danca">Dança</a>
         <a href="#cartas">Cartas</a>
         <a href="#pano">O pano</a>
       </nav>
@@ -960,6 +972,86 @@ Adamant Nature
 
     <hr class="costura">
 
+    <!-- ==================== DANÇA (minijogo de ritmo) ==================== -->
+    <section class="faixa" id="danca">
+      <p class="rotulo">Pista de dança</p>
+      <h2>Ele aprendeu a dançar vendo TV</h2>
+      <p class="intro">Quando a casa dorme, ele liga a televisão baixinho e copia os passos do clipe. Escolha uma música e aperte as setas na hora em que a nota chega no botão: cada acerto vira um passo dele.</p>
+
+      <!-- tabindex: é para cá que o foco volta quando alguém clica na TV -->
+      <div class="rt" id="rt" tabindex="-1">
+        <div class="rt-palco" id="rt-palco">
+          <div class="rt-tv"><div id="rt-video"></div></div>
+          <!-- só até o 3D descer -->
+          <img class="rt-costas" id="rt-costas" src="imagens/mimikyu-costas.png" width="96" height="96"
+               alt="Mimikyu de costas, olhando para a televisão desligada">
+          <div class="rt-hud" aria-hidden="true">
+            <span><b id="rt-pontos">0</b> pontos</span>
+            <span><b id="rt-combo">0</b> combo</span>
+          </div>
+        </div>
+
+        <div class="rt-pista">
+          <canvas class="rt-trilho" id="rt-trilho" aria-hidden="true"></canvas>
+          <!-- o julgamento muda a cada nota: anunciar todos afogaria o leitor de tela -->
+          <p class="rt-nota" id="rt-nota" aria-hidden="true"></p>
+          <div class="rt-botoes">
+            <button type="button" class="rt-seta" aria-label="Esquerda">&larr;</button>
+            <button type="button" class="rt-seta" aria-label="Baixo">&darr;</button>
+            <button type="button" class="rt-seta" aria-label="Cima">&uarr;</button>
+            <button type="button" class="rt-seta" aria-label="Direita">&rarr;</button>
+          </div>
+        </div>
+
+        <!-- a música não pula: a única coisa que se escolhe é a velocidade -->
+        <div class="rt-veloc" role="group" aria-label="Velocidade da música">
+          <span aria-hidden="true">Velocidade</span>
+          <button type="button" data-taxa="0.5" aria-pressed="false">0,5×</button>
+          <button type="button" data-taxa="0.75" aria-pressed="false">0,75×</button>
+          <button type="button" data-taxa="1" aria-pressed="true">1×</button>
+          <button type="button" data-taxa="1.25" aria-pressed="false">1,25×</button>
+          <button type="button" data-taxa="1.5" aria-pressed="false">1,5×</button>
+        </div>
+
+        <p class="rt-estado" id="rt-estado" aria-live="polite">Escolha uma música aqui embaixo. Setas do teclado ou os botões.</p>
+
+        <div class="rt-menu">
+          <div>
+            <h3>A fita dele<small>BTS, gravado da TV</small></h3>
+            <ol class="rt-lista" id="rt-lista">
+              <li><button type="button" data-video="gdZLi9oWNZg" data-bpm="114">Dynamite <small>114 BPM</small></button></li>
+              <li><button type="button" data-video="WMweEpGlu_U" data-bpm="110">Butter <small>110 BPM</small></button></li>
+              <li><button type="button" data-video="CuklIb9d3fI" data-bpm="125">Permission to Dance <small>125 BPM</small></button></li>
+              <li><button type="button" data-video="XsX3ATc3FbA" data-bpm="120">Boy With Luv <small>120 BPM</small></button></li>
+              <li><button type="button" data-video="pBuZEGYXA6E" data-bpm="126">IDOL <small>126 BPM</small></button></li>
+              <li><button type="button" data-video="MBdVXkSdhwU" data-bpm="130">DNA <small>130 BPM</small></button></li>
+              <li><button type="button" data-video="mPVDGOVjRQ0" data-bpm="106">ON <small>106 BPM</small></button></li>
+              <li><button type="button" data-video="xEeFrLSkMm8" data-bpm="107">Spring Day <small>107 BPM</small></button></li>
+              <li><button type="button" data-video="hmE9f-TEutc" data-bpm="93">Blood Sweat &amp; Tears <small>93 BPM</small></button></li>
+              <li><button type="button" data-video="-5q5mZbe3V8" data-bpm="81">Life Goes On <small>81 BPM</small></button></li>
+              <li><button type="button" data-video="7C2z4GqqS5E" data-bpm="78">FAKE LOVE <small>78 BPM</small></button></li>
+            </ol>
+          </div>
+
+          <form class="rt-url" id="rt-url">
+            <h3>Outra música<small>qualquer clipe do YouTube</small></h3>
+            <label>Link do vídeo
+              <input type="text" id="rt-link" inputmode="url" autocomplete="off" required
+                     placeholder="https://www.youtube.com/watch?v=…">
+            </label>
+            <label>BPM <i>opcional: se souber, ele acerta o ritmo mais rápido</i>
+              <input type="number" id="rt-bpm" min="40" max="250" step="any" placeholder="opcional">
+            </label>
+            <button class="botao">Tocar na TV</button>
+          </form>
+        </div>
+      </div>
+
+      <p class="fonte-dados">Clipes tocados pelo player do YouTube, direto dos canais oficiais. O YouTube não deixa a página ouvir o áudio: as batidas da fita foram achadas antes, e para link novo ele escuta o áudio desta aba, se você deixar (Chrome ou Edge, no computador). Modelo 3D: <a href="https://sketchfab.com/3d-models/pokemon-pikachu-4949a0c1c03a47c6892a585c3ed39cf6" target="_blank" rel="noopener">Mimikyu de Minecraft_Master</a>, sob <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>, sem alterações além de tirar a compressão.</p>
+    </section>
+
+    <hr class="costura">
+
     <!-- ==================== CARTAS (TCG) ==================== -->
     <section class="faixa" id="cartas">
       <p class="rotulo">Estampa ilustrada</p>
@@ -1309,7 +1401,7 @@ Adamant Nature
       <button type="button" class="botao-movimento" id="botao-movimento">
         <span class="texto"></span>
       </button>
-      <span>Imagens e dados: PokéAPI (arte oficial, modelos e sprites), Pokémon TCG API (34 cartas), Smogon e Pikalytics (builds)</span>
+      <span>Imagens e dados: PokéAPI (arte oficial, modelos e sprites), Pokémon TCG API (34 cartas), Smogon e Pikalytics (builds), YouTube (clipes da pista de dança)</span>
     </div>
     <p class="aviso-legal">
       Site feito por um fã, sem fins lucrativos e <strong>sem qualquer afiliação, patrocínio ou
@@ -1351,5 +1443,7 @@ Adamant Nature
 <script src="js/guarda-roupa.js"></script>
 <script src="js/anatomia.js"></script>
 <script src="js/interface.js"></script>
+<script src="js/batidas.js"></script>
+<script src="js/ritmo.js"></script>
 </body>
 </html>

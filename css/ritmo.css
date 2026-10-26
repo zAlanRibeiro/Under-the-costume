@@ -1,0 +1,150 @@
+/* ============================================================
+   Pista de dança: o minijogo de ritmo
+   ============================================================ */
+.rt {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: 18px 24px;
+}
+/* o foco só vem para cá quando o jogo o tira de dentro da TV: não é lugar de parar */
+.rt:focus { outline: none; }
+@media (max-width: 860px) { .rt { grid-template-columns: 1fr; } }
+
+/* ---------- o palco: a TV na parede e ele na frente ---------- */
+.rt-palco {
+  position: relative; overflow: hidden;
+  aspect-ratio: 16 / 11; min-height: 300px;
+  border: 1px solid var(--borda);
+  background:
+    radial-gradient(60% 50% at 50% 30%, rgba(122, 90, 168, .22), transparent 70%),
+    linear-gradient(transparent 72%, rgba(42, 32, 54, .55) 72%),
+    var(--cripta);
+}
+.rt-tv {
+  /* nunca acima de 36px: o placar mora no canto de cima */
+  position: absolute; top: max(6%, 36px); left: 50%; transform: translateX(-50%);
+  width: 54%; aspect-ratio: 16 / 9;
+  background: #000;
+  border: 9px solid var(--borda-forte); border-radius: 8px;
+  box-shadow: 0 0 46px rgba(122, 90, 168, .4);
+}
+.rt-tv iframe { width: 100%; height: 100%; display: block; border: 0; pointer-events: none; }
+/* a TV não aceita clique (pausaria, pularia, abriria outro vídeo), menos antes
+   do primeiro play, para quando o navegador barra o autoplay */
+.rt-tv-livre .rt-tv iframe { pointer-events: auto; }
+.rt-costas {
+  position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
+  width: 132px; height: auto; image-rendering: pixelated;
+}
+/* por cima da TV, mas sem roubar o clique do player */
+.rt-3d { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.rt-hud {
+  position: absolute; top: 10px; left: 12px;
+  display: flex; gap: 14px;
+  font-family: var(--dados); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--tinta-fraca);
+}
+.rt-hud b { color: var(--pano); font-size: 15px; font-variant-numeric: tabular-nums; }
+
+/* ---------- a pista ---------- */
+.rt-pista {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: 360px; overflow: hidden;
+  border: 1px solid var(--borda);
+  background: radial-gradient(70% 45% at 50% 100%, rgba(122, 90, 168, .22), transparent 70%), var(--breu);
+}
+/* a estrada, os trastes e as gemas são desenhados no canvas, por trás dos botões */
+.rt-trilho { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.rt-botoes {
+  position: relative;   /* posicionado, para pintar por cima do canvas */
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 10px 12px;
+}
+/* o botão é só a área de toque e o foco; o traste que se vê é o do canvas */
+.rt-seta {
+  aspect-ratio: 1; border-radius: 50%;
+  border: 0; background: transparent; color: transparent;
+  font-size: 24px; line-height: 1; cursor: pointer;
+  /* sem atraso de toque duplo nem zoom no celular */
+  touch-action: manipulation; user-select: none;
+}
+
+.rt-nota {
+  position: absolute; left: 0; right: 0; top: 34%; margin: 0; max-width: none;
+  text-align: center; pointer-events: none;
+  font-family: var(--display); font-variation-settings: "SOFT" 100, "WONK" 1;
+  font-weight: 900; font-size: 32px; line-height: 1;
+  /* contorno escuro para ler por cima da estrada e das gemas */
+  text-shadow: 0 2px 0 #0A0710, 0 -1px 0 #0A0710, 2px 0 0 #0A0710, -2px 0 0 #0A0710, 0 0 16px rgba(10, 7, 16, .9);
+}
+.rt-nota[data-nota="0"] { color: #FFF6D8; text-shadow: 0 2px 0 #0A0710, 0 0 18px rgba(255, 211, 56, .8); }
+.rt-nota[data-nota="1"] { color: #FFD338; }
+.rt-nota[data-nota="2"] { color: #2BD95F; }
+.rt-nota[data-nota="3"] { color: #3B8BFF; }
+.rt-nota[data-nota="4"] { color: var(--tinta-media); }
+.rt-nota[data-nota="5"] { color: var(--tinta-fraca); }
+.rt-nota[data-nota="6"] { color: var(--fada); }
+:root.com-movimento .rt-nota.pop { animation: rt-pop .3s ease-out; }
+@keyframes rt-pop { from { transform: scale(1.35); opacity: .3; } }
+
+/* ---------- velocidade ---------- */
+.rt-veloc { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rt-veloc span {
+  font-family: var(--dados); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--tinta-fraca); margin-right: 6px;
+}
+.rt-veloc button {
+  font-family: var(--dados); font-size: 12px; color: var(--tinta-media);
+  background: var(--cripta); border: 1px solid var(--borda); border-radius: var(--raio);
+  padding: 6px 12px; cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+.rt-veloc button:hover { border-color: var(--pano-fundo); }
+.rt-veloc button[aria-pressed="true"] { color: var(--breu); background: var(--pano); border-color: var(--pano); }
+
+/* ---------- estado e menu ---------- */
+.rt-estado {
+  grid-column: 1 / -1; margin: 0; max-width: none;
+  font-family: var(--dados); font-size: 13px; color: var(--tinta-media);
+  white-space: pre-line;   /* o placar final vem em duas linhas */
+}
+.rt-menu {
+  grid-column: 1 / -1;
+  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px;
+}
+@media (max-width: 760px) { .rt-menu { grid-template-columns: 1fr; } }
+.rt-menu h3 { margin-bottom: 12px; }
+.rt-menu h3 small {
+  display: block; margin-top: 3px;
+  font-family: var(--dados); font-size: 10.5px; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-fraca);
+}
+.rt-lista {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px;
+}
+.rt-lista button {
+  width: 100%; height: 100%;   /* mesma altura na linha, mesmo quando o vizinho quebra */
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  font: inherit; font-size: 15px; text-align: left; color: var(--tinta);
+  background: var(--cripta); border: 1px solid var(--borda); border-radius: var(--raio);
+  padding: 9px 12px; cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+}
+.rt-lista button small { font-family: var(--dados); font-size: 11px; color: var(--tinta-fraca); white-space: nowrap; }
+.rt-lista button:hover { border-color: var(--pano-fundo); }
+.rt-lista button[aria-current="true"] { border-color: var(--pano); background: rgba(227, 200, 106, .08); }
+
+.rt-url { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.rt-url label {
+  display: flex; flex-direction: column; gap: 5px; width: 100%;
+  font-family: var(--dados); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--tinta-fraca);
+}
+.rt-url label i { font-style: normal; text-transform: none; letter-spacing: 0; }
+.rt-url input {
+  font: inherit; font-family: var(--corpo); font-size: 15px; letter-spacing: 0; text-transform: none;
+  color: var(--tinta); background: var(--cripta);
+  border: 1px solid var(--borda-forte); border-radius: var(--raio);
+  padding: 9px 11px; width: 100%;
+}
+.rt-url input:focus { border-color: var(--pano-fundo); outline: none; }
+.rt-url input:focus-visible { outline: 2px solid var(--fada); outline-offset: 2px; }

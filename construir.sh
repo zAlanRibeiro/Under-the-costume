@@ -22,6 +22,12 @@ for f in "$raiz"/imagens/comida/*.png; do
   echo "s|imagens/comida/$nome|data:image/png;base64,$(base64 -w0 "$f")|g" >> "$subs"
 done
 
+# o modelo 3D da pista de danca: o GLTFLoader aceita data URI como se fosse arquivo
+for f in "$raiz"/modelos/*.glb; do
+  nome="$(basename "$f")"
+  echo "s|modelos/$nome|data:model/gltf-binary;base64,$(base64 -w0 "$f")|g" >> "$subs"
+done
+
 # sprites dos itens segurados
 for f in "$raiz"/imagens/itens/*.png; do
   nome="$(basename "$f")"
@@ -45,19 +51,20 @@ done
   grep 'fonts\.' "$raiz/index.html"
   echo '<style>'
   # a mesma ordem dos <link> do index.html: a cascata depende dela
-  for m in base heroi conteudo builds cartas palco guarda-roupa anatomia; do
+  for m in base heroi conteudo builds cartas palco guarda-roupa anatomia ritmo; do
     cat "$raiz/css/$m.css"
   done
   echo '</style>'
 
-  # O script que decide movimento mora no <head> do index.html, e o corpo abaixo
-  # so copia o que esta entre <body> e </body> — sem isto, a classe sem-movimento
-  # nunca e pintada no <html> e as 20 regras que dependem dela ficam mortas no
-  # arquivo unico. Aqui ele entra logo apos o CSS, antes de qualquer conteudo.
+  # Os scripts do <head> do index.html, e o corpo abaixo so copia o que esta
+  # entre <body> e </body>. Sem o de movimento, a classe sem-movimento nunca e
+  # pintada no <html> e as 20 regras que dependem dela ficam mortas no arquivo
+  # unico; sem o importmap, o import("three") da pista de danca nao resolve.
+  # Entram logo apos o CSS, antes de qualquer conteudo.
   awk '
     /<head>/   { dentro = 1; next }
     /<\/head>/ { dentro = 0 }
-    dentro && /<script>/ { copiando = 1 }
+    dentro && /<script/ { copiando = 1 }
     copiando   { print }
     copiando && /<\/script>/ { copiando = 0 }
   ' "$raiz/index.html"
@@ -68,6 +75,7 @@ done
   echo '<script>'
   cat "$raiz/js/comum.js"
   cat "$raiz/js/fantasias.js"
+  cat "$raiz/js/batidas.js"
 
   # as 50 fantasias sao montadas em tempo de execucao pelo JS, entao o sed do HTML
   # nao as alcanca: vao num mapa id -> data URI que o guarda-roupa.js consulta
@@ -79,7 +87,7 @@ done
   echo '};'
 
   # o proprio JS tambem cita imagens (o icone dos slots vazios)
-  for m in fundo palco guarda-roupa anatomia interface; do
+  for m in fundo palco guarda-roupa anatomia interface ritmo; do
     sed -f "$subs" "$raiz/js/$m.js"
   done
   echo '</script>'
