@@ -172,7 +172,10 @@
   }
 
   function tocar(m, botao) {
-    if (emTela()) mostrar("danca");
+    /* escolheu: vai direto para o jogo, que fica acima da lista. No celular a
+       tela cheia troca de modo, mas a rolagem da lista ficava lá embaixo. */
+    if (emTela()) { mostrar("danca"); rt.scrollTop = 0; }
+    else rt.scrollIntoView({ block: "start", behavior: semMovimento ? "auto" : "smooth" });
     musica = m;
     etapa = "carregando";
     espera = null;
