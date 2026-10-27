@@ -600,6 +600,7 @@
   function flecha(x, y, tam, qual, cor) {
     ctx.save();
     ctx.translate(x, y);
+    ctx.scale(1, 1 / ACHATA);   // quem chama está no plano achatado; a seta fica de pé, para ↑ e ↓ não encolherem
     ctx.rotate(ANGULOS[qual]);
     ctx.scale(tam, tam);
     ctx.beginPath();
@@ -611,7 +612,8 @@
     ctx.restore();
   }
 
-  /* a gema: um disco grosso da cor da faixa, tampa branca com a seta, brilho no alto */
+  /* a gema: um disco grosso da cor da faixa, tampa branca com a seta escura (na
+     cor da faixa, a amarela sumia no branco), brilho no alto */
   function gema(x, y, r, qual, alfa, apagada) {
     var cor = apagada ? "#5A5266" : CORES[qual];
     ctx.save();
@@ -627,10 +629,10 @@
     sombra.addColorStop(0.55, "rgba(255, 255, 255, 0)");
     sombra.addColorStop(1, "rgba(10, 7, 16, .45)");
     ctx.fillStyle = sombra; ctx.fill();
-    ctx.beginPath(); ctx.arc(0, -r * 0.04, r * 0.52, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(0, -r * 0.04, r * 0.6, 0, Math.PI * 2);
     ctx.fillStyle = apagada ? "#8A8296" : "#F7F3EA"; ctx.fill();
     ctx.lineWidth = r * 0.09; ctx.strokeStyle = "rgba(10, 7, 16, .35)"; ctx.stroke();
-    flecha(0, -r * 0.04, r * 0.34, qual, cor);
+    flecha(0, -r * 0.04, r * 0.4, qual, apagada ? cor : "#120D1B");
     ctx.beginPath(); ctx.ellipse(-r * 0.42, -r * 0.5, r * 0.22, r * 0.1, -0.5, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(255, 255, 255, .55)"; ctx.fill();
     ctx.restore();
@@ -729,7 +731,7 @@
       if (aperto) { ctx.shadowColor = CORES[q]; ctx.shadowBlur = raio * 0.9 * aperto; }
       ctx.lineWidth = raio * 0.16; ctx.strokeStyle = CORES[q]; ctx.stroke();
       ctx.shadowBlur = 0;
-      flecha(0, 0, raio * 0.36, q, aperto ? "#120D1B" : CORES[q]);
+      flecha(0, 0, raio * 0.42, q, aperto ? "#120D1B" : CORES[q]);
       ctx.restore();
     }
 
