@@ -52,6 +52,16 @@
     function texto(t) { recado.textContent = t; }
     function sorteio(lista) { return lista[Math.floor(Math.random() * lista.length)]; }
 
+    /* o grito dele, da PokéAPI; em WAV porque o .ogg original não toca em todo iPhone */
+    var grito = new Audio("sons/mimikyu-grito.wav");
+    grito.volume = 0.6;
+    function gritar() {
+      grito.currentTime = 0;
+      /* antes do primeiro clique na página o navegador barra o som: fica mudo, sem erro */
+      var p = grito.play();
+      if (p) p.catch(function () {});
+    }
+
     /* ==========================================================
        Amizade — a mesma escala de 0 a 255 do jogo
        ========================================================== */
@@ -183,7 +193,9 @@
 
         if (agora - ultimoRecadoCarinho > 2400 && afeto < AFETO_MAX) {
           ultimoRecadoCarinho = agora;
-          texto(sorteio(quebrado ? carinhoQuebrado : carinhoInteiro));
+          var dito = sorteio(quebrado ? carinhoQuebrado : carinhoInteiro);
+          texto(dito);
+          if (dito.indexOf("barulhinho") >= 0) gritar();
         }
       }
     }, { passive: true });
@@ -283,6 +295,7 @@
       duracaoReparo = COSTURA;
       alvo.classList.add("busted");
       sacudir();
+      gritar();
       alvo.setAttribute("aria-label", "Mimikyu com o disfarce quebrado, costurando de volta");
       estado.textContent = "Quebrado";
       barra.classList.add("reparando");

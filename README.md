@@ -10,7 +10,7 @@ Vinte centímetros de pano velho sobre uma coisa que ninguém descreveu duas vez
 
 | Seção | Conteúdo |
 |---|---|
-| **Palco** | Carinho com o cursor, comida, medidor de amizade de 0 a 255 e o disfarce que quebra com um golpe |
+| **Palco** | Carinho com o cursor, comida, medidor de amizade de 0 a 255 e o disfarce que quebra com um golpe, com o grito dele |
 | **Registro** | Seis entradas de Pokédex, de Sol e Lua a Escarlate e Violeta |
 | **Anatomia** | Diagrama com seis chamadas sobre a arte oficial, com barra de escala real (0,2 m) |
 | **Ficha** | Estatísticas-base, tabela de tipos calculada e a habilidade Disguise |
@@ -68,6 +68,7 @@ imagens/              arte oficial, modelos 3D e sprites
   itens/ comida/      sprites de itens
 costumes.jpg          folha de referência com as 50 fantasias (fonte dos sprites)
 modelos/              o Mimikyu 3D da pista de dança (.glb)
+sons/                 o grito dele (da PokéAPI, convertido para WAV)
 dados/                JSONs de origem, URLs das cartas e os scripts que fatiam a folha e acham as batidas
 construir.sh          empacota tudo num arquivo único em dist/
 ```
@@ -87,7 +88,7 @@ Junta HTML, CSS, JS e **todas** as imagens (como data URI) num único `dist/inde
 
 ## De onde vêm os dados
 
-- **Arte oficial, modelos do Pokémon HOME e sprites** — [PokéAPI](https://pokeapi.co)
+- **Arte oficial, modelos do Pokémon HOME, sprites e o grito** — [PokéAPI](https://pokeapi.co) (o grito vem do [PokeAPI/cries](https://github.com/PokeAPI/cries), em .ogg, e foi convertido para WAV porque o .ogg não toca em todo iPhone)
 - **As 34 cartas** — [Pokémon TCG API](https://pokemontcg.io)
 - **Builds competitivas** — [Smogon](https://www.smogon.com/dex/sv/pokemon/mimikyu/)
 - **As batidas da fita** — achadas por [`dados/ritmo.py`](dados/ritmo.py) no áudio dos próprios clipes, partindo do BPM de [SongBPM](https://songbpm.com/@bts) e [Tunebat](https://tunebat.com). Os clipes tocam pelo player do YouTube, direto dos canais oficiais

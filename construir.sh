@@ -34,6 +34,12 @@ for f in "$raiz"/imagens/itens/*.png; do
   echo "s|imagens/itens/$nome|data:image/png;base64,$(base64 -w0 "$f")|g" >> "$subs"
 done
 
+# o grito dele, que o palco.js toca
+for f in "$raiz"/sons/*.wav; do
+  nome="$(basename "$f")"
+  echo "s|sons/$nome|data:audio/wav;base64,$(base64 -w0 "$f")|g" >> "$subs"
+done
+
 # cartas do TCG (JPEG: 6x menor que o PNG original, e carta nao precisa de alfa)
 for f in "$raiz"/imagens/tcg/*.jpg; do
   nome="$(basename "$f")"
